@@ -9,15 +9,16 @@ public class UIController : MonoBehaviour
     [SerializeField] private Button hostButton;
     void Start()
     {
+        // Makes a new Function that is called when the buttons are clicked
         clientButton.onClick.AddListener(() =>
         {
             NetworkManager.Singleton.StartClient();
-            SceneManager.LoadScene("SampleScene");
+            gameObject.SetActive(false);
         });
         hostButton.onClick.AddListener(() =>
         {
             NetworkManager.Singleton.StartHost();
-            SceneManager.LoadScene("SampleScene");
+            gameObject.SetActive(false);
         });
     }
 

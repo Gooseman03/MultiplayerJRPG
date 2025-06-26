@@ -34,8 +34,10 @@ public class PlayerMovement : NetworkBehaviour
     {
         if (IsServer)
         {
-            int i = 0;
-            while (serverQueue.GrabNextMessage(out MessageBundle message))
+            if (IsLocalPlayer) UpdatePositionRPC(transform.position, 0);
+            List<MessageBundle> queue = serverQueue.GetMessageQueue();
+            //queue.Sort((mes1, mes2) => { return mes1.Id.CompareTo(mes2.Id); });
+            foreach (MessageBundle message in queue)
             {
                 Movement(message.Input.normalized);
                 UpdatePositionRPC(transform.position, message.Id);
@@ -57,7 +59,7 @@ public class PlayerMovement : NetworkBehaviour
     public void Movement(Vector2 movementVector)
     {
         // Length of one tick
-        float deltaTime = NetworkManager.Singleton.NetworkTickSystem.LocalTime.FixedDeltaTime;
+        float deltaTime = NetworkManager.Singleton.NetworkTickSystem.ServerTime.FixedDeltaTime;
         MovePlayer(movementVector * speed * deltaTime);
     }
 
@@ -80,7 +82,11 @@ public class PlayerMovement : NetworkBehaviour
             clientReconcile.IsPredictionCorrect(NewPosition, MessageId);
             return;
         }
-        transform.position = NewPosition;
+        else
+        {
+            transform.position = NewPosition;
+            return;
+        }
     }
 
     [Rpc(SendTo.Server, Delivery = RpcDelivery.Unreliable)]

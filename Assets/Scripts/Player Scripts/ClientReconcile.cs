@@ -1,6 +1,8 @@
 using System.Collections.Generic;
+using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.Assertions.Must;
 using static UnityEngine.RuleTile.TilingRuleOutput;
 
 namespace Ladder.PlayerMovementHelpers
@@ -28,15 +30,14 @@ namespace Ladder.PlayerMovementHelpers
 
         public void IsPredictionCorrect(Vector2 NewPosition, ulong messageId)
         {
-            if (PreviousLocations.ContainsKey(messageId))
-            { 
-                if (PreviousLocations[messageId] != NewPosition)
+            if (PreviousLocations.TryGetValue(messageId, out Vector2 message))
+            {
+                DiscardMessagesBefore(messageId);
+                if (message != NewPosition)
                 {
                     Resync(NewPosition, messageId);
-                    return;
-                } 
+                }
             }
-            DiscardMessagesBefore(messageId);
         }
         public void DiscardMessagesBefore(ulong messageId)
         {
@@ -44,9 +45,9 @@ namespace Ladder.PlayerMovementHelpers
             List<ulong> Remove = new List<ulong>();
             foreach(ulong Id in PreviousLocations.Keys)
             {
-                if (Id <= messageId)
+                if (Id < messageId)
                 {
-                    Remove.Add(messageId);
+                    Remove.Add(Id);
                 }
             }
             foreach (ulong Id in Remove)
@@ -56,22 +57,16 @@ namespace Ladder.PlayerMovementHelpers
         }
         public void Resync(Vector2 NewPosition, ulong MessageId)
         {
-            Debug.Log(NewPosition + " " + transform.position);
+            Debug.Log(NewPosition + " " + PreviousLocations[MessageId]);
             Vector2 Offset = PreviousLocations[MessageId] - NewPosition;
-            Debug.Log("I Have Desynced... Correcting by " + Offset, this.gameObject);
-            DiscardMessagesBefore(MessageId);
+            Debug.Log("I Have Desynced at MessageID" + MessageId + "... Correcting by " + Offset, this.gameObject);
             List<ulong> keys = new List<ulong>(PreviousLocations.Keys);
-            ulong NewestMove = keys[0];
             foreach (ulong key in keys)
             {
                 PreviousLocations[key] -= Offset;
-                if (NewestMove < key)
-                {
-                    NewestMove = key;
-                }
             }
             // Set possition to corrected one 
-            transform.position = PreviousLocations[NewestMove];
+            transform.position -= new Vector3(Offset.x, Offset.y, 0);
         }
     }
 }

@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 7710950263828226558}
   - component: {fileID: 7875514272864897525}
   - component: {fileID: -1697878949725914350}
+  - component: {fileID: 8533944253021305013}
   m_Layer: 0
   m_Name: player
   m_TagString: Player
@@ -175,13 +176,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  rb: {fileID: -1697878949725914350}
   speed: 5
-  baseGhost: {fileID: 1448773918047351170, guid: d850fec6cbe4f7a4b9f9e29f9095d0a7, type: 3}
-  rollSpeed: 5
-  rollTimer: 1
-  rollDuration: 1
-  rollCooldown: 5
 --- !u!50 &-1697878949725914350
 Rigidbody2D:
   serializedVersion: 5
@@ -209,3 +204,15 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
+--- !u!114 &8533944253021305013
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 495610275832350845}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae766dd707308bc43a83a4a7d9a4517b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

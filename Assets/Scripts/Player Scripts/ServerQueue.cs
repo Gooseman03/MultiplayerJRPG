@@ -1,16 +1,35 @@
+using Ladder.PlayerMovementHelpers;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using UnityEditor.VersionControl;
+using Unity.Netcode;
 using UnityEngine;
-using static UnityEngine.InputSystem.InputRemoting;
 
 namespace Ladder.PlayerMovementHelpers
 {
+    [Serializable]
     public struct MessageBundle
     {
-        public Vector2 Input;
+        private float x;
+        private float y;
+        public Vector2 Input
+        {
+            get
+            {
+                return new Vector2(x, y);
+            }
+            set
+            {
+                x = value.x; 
+                y = value.y;
+            }
+        }
         public ulong Id;
+        public MessageBundle(MessageBundle ToCopy)
+        {
+            this.Id = ToCopy.Id;
+            x = ToCopy.Input.x;
+            y = ToCopy.Input.y;
+        }
     }
     public class ServerQueue
     {

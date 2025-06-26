@@ -2,14 +2,12 @@ using System.Collections.Generic;
 using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.Assertions.Must;
-using static UnityEngine.RuleTile.TilingRuleOutput;
 
 namespace Ladder.PlayerMovementHelpers
 {
     public class ClientReconcile : NetworkBehaviour
     {
-        private Dictionary<ulong, Vector2> PreviousLocations = new Dictionary<ulong, Vector2>();
+        private Dictionary<ulong, Vector2> PreviousMessages = new Dictionary<ulong, Vector2>();
         private PlayerMovement owner = null;
         private ulong messageCounter = 0;
         private void Awake()
@@ -18,11 +16,37 @@ namespace Ladder.PlayerMovementHelpers
         }
         public void StampLocation()
         {
-            PreviousLocations.Add(messageCounter, new(owner.transform.position.x, owner.transform.position.y));
+            PreviousMessages.Add(messageCounter, new(owner.transform.position.x, owner.transform.position.y));
         }
 
         public void SendMovementMessage(Vector2 movementVector)
         {
+            //if (CorrectionMessages != 0)
+            //{
+            //    List<MessageBundle> messages = new List<MessageBundle>();
+            //    for (int i = CorrectionMessages; i > 0; i--)
+            //    {
+            //        if (PreviousMessages.TryGetValue(messageCounter - (ulong)i, out Vector2 location))
+            //        {
+            //            messages.Add(new MessageBundle() { Input = location, Id = messageCounter - (ulong)i });
+            //        }
+            //    }
+            //    Vector2[] vectors = new Vector2[messages.Count + 1];
+            //    ulong[] ids = new ulong[messages.Count + 1];
+            //    int c = 0;
+            //    foreach (MessageBundle message in messages)
+            //    {
+            //        vectors[c] = message.Input;
+            //        ids[c] = message.Id;
+            //        c++;
+            //    }
+            //    messageCounter++;
+            //    vectors[c] = movementVector;
+            //    ids[c] = messageCounter;
+            //    owner.MovementRequestRPC(vectors, ids);
+            //    StampLocation();
+            //    return;
+            //}
             messageCounter++;
             owner.MovementRequestRPC(movementVector, messageCounter);
             StampLocation();
@@ -30,7 +54,7 @@ namespace Ladder.PlayerMovementHelpers
 
         public void IsPredictionCorrect(Vector2 NewPosition, ulong messageId)
         {
-            if (PreviousLocations.TryGetValue(messageId, out Vector2 message))
+            if (PreviousMessages.TryGetValue(messageId, out Vector2 message))
             {
                 DiscardMessagesBefore(messageId);
                 if (message != NewPosition)
@@ -39,11 +63,11 @@ namespace Ladder.PlayerMovementHelpers
                 }
             }
         }
+
         public void DiscardMessagesBefore(ulong messageId)
         {
-            // Has bug where some messages arent being deleted
             List<ulong> Remove = new List<ulong>();
-            foreach(ulong Id in PreviousLocations.Keys)
+            foreach(ulong Id in PreviousMessages.Keys)
             {
                 if (Id < messageId)
                 {
@@ -52,20 +76,20 @@ namespace Ladder.PlayerMovementHelpers
             }
             foreach (ulong Id in Remove)
             {
-                PreviousLocations.Remove(Id);
+                PreviousMessages.Remove(Id);
             }
         }
         public void Resync(Vector2 NewPosition, ulong MessageId)
         {
-            Debug.Log(NewPosition + " " + PreviousLocations[MessageId]);
-            Vector2 Offset = PreviousLocations[MessageId] - NewPosition;
+            Debug.Log(NewPosition + " " + PreviousMessages[MessageId]);
+            Vector2 Offset = PreviousMessages[MessageId] - NewPosition;
             Debug.Log("I Have Desynced at MessageID" + MessageId + "... Correcting by " + Offset, this.gameObject);
-            List<ulong> keys = new List<ulong>(PreviousLocations.Keys);
+            List<ulong> keys = new List<ulong>(PreviousMessages.Keys);
             foreach (ulong key in keys)
             {
-                PreviousLocations[key] -= Offset;
+                PreviousMessages[key] -= Offset;
             }
-            // Set possition to corrected one 
+            // Set position to corrected one 
             transform.position -= new Vector3(Offset.x, Offset.y, 0);
         }
     }

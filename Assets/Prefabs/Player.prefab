@@ -15,6 +15,8 @@ GameObject:
   - component: {fileID: 7875514272864897525}
   - component: {fileID: -1697878949725914350}
   - component: {fileID: 8533944253021305013}
+  - component: {fileID: -6208306139734863822}
+  - component: {fileID: -7335981869460385141}
   m_Layer: 0
   m_Name: player
   m_TagString: Player
@@ -177,6 +179,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   speed: 5
+  Interpolate: 1
+  Extrapolate: 1
 --- !u!50 &-1697878949725914350
 Rigidbody2D:
   serializedVersion: 5
@@ -216,3 +220,33 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ae766dd707308bc43a83a4a7d9a4517b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+--- !u!114 &-6208306139734863822
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 495610275832350845}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bdbcaf406b7da21409e1beb98d6390b1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  InterpolationSpeed: 6
+--- !u!114 &-7335981869460385141
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 495610275832350845}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cbe07705db02df147b8f76a72763941e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  lastMessage:
+    Id: 0

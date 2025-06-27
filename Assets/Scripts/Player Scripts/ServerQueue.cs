@@ -1,7 +1,5 @@
-using Ladder.PlayerMovementHelpers;
 using System;
 using System.Collections.Generic;
-using Unity.Netcode;
 using UnityEngine;
 
 namespace Ladder.PlayerMovementHelpers
@@ -19,11 +17,11 @@ namespace Ladder.PlayerMovementHelpers
             }
             set
             {
-                x = value.x; 
+                x = value.x;
                 y = value.y;
             }
         }
-        public ulong Id;
+        public uint Id;
         public MessageBundle(MessageBundle ToCopy)
         {
             this.Id = ToCopy.Id;
@@ -38,10 +36,37 @@ namespace Ladder.PlayerMovementHelpers
         {
             this.owner = owner;
         }
+        public MessageBundle LastGoodMessage = new MessageBundle();
+        public void SetGoodMessage(MessageBundle message)
+        {
+            LastGoodMessage = message;
+        }
 
+        private Dictionary<uint, Vector2> messageBuffer = new Dictionary<uint, Vector2>();
+        public void TryAddMessageToBuffer(Vector2 ClientInputVector, uint MessageId)
+        {
+            if (MessageId <= owner.NetworkManager.ServerTime.Tick) { return; }
+            messageBuffer.TryAdd(MessageId, ClientInputVector);
+        }
+        public bool TryGetMessageAt(uint messageId, out MessageBundle message)
+        {
+            message = new();
+            if (messageBuffer.TryGetValue(messageId, out Vector2 messageVector))
+            {
+                message = new() { Id = messageId, Input = messageVector };
+                return true;
+            }
+            return false;
+        }
+        public void RemoveMessageFromBuffer(uint MessageId)
+        {
+            messageBuffer.Remove(MessageId);
+        }
+
+        /*
         [SerializeField] private List<MessageBundle> MessageQueue = new();
         [SerializeField] private List<MessageBundle> HistoryQueue = new();
-        public void AddMessageToQueue(Vector2 ClientInputVector, ulong MessageId)
+        public void AddMessageToQueue(Vector2 ClientInputVector, uint MessageId)
         {
             MessageQueue.Insert(MessageQueue.FindLastIndex((mes) => mes.Id <= MessageId) + 1,
                 new() {
@@ -66,5 +91,6 @@ namespace Ladder.PlayerMovementHelpers
         {
             MessageQueue.ForEach(action);
         }
+        */
     }
 }

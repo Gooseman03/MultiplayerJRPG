@@ -4,7 +4,7 @@ using UnityEngine.InputSystem;
 namespace Ladder.Input
 {
     [DisallowMultipleComponent]
-    public class InputManager  : MonoBehaviour
+    public class InputManager : MonoBehaviour
     {
         private static InputManager instance;
 
@@ -32,15 +32,15 @@ namespace Ladder.Input
         private InputAction interactAction;
         private InputAction sprintAction;
 
-        private Vector2 lastMoveAction = new Vector2(0,0);
+        private Vector2 lastMoveAction = new Vector2(0, 0);
 
         // Use any of these methods to get the current input state
         public static Vector2 Move => instance.GetMove();
         public static Vector2 LastMove => instance.GetLastMove();
-        public static Vector2 Look => instance.GetLook(); 
-        public static bool Attack => instance.GetAttack(); 
-        public static bool Interact => instance.GetInteract(); 
-        public static bool Sprint => instance.GetSprint(); 
+        public static Vector2 Look => instance.GetLook();
+        public static bool Attack => instance.GetAttack();
+        public static bool Interact => instance.GetInteract();
+        public static bool Sprint => instance.GetSprint();
 
         private Vector2 GetMove()
         {

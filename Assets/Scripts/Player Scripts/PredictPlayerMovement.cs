@@ -1,6 +1,6 @@
 using Ladder.Input;
-using UnityEngine;
 using Unity.Netcode;
+using UnityEngine;
 
 public class PredictPlayerMovement : NetworkBehaviour
 {

@@ -1,30 +1,26 @@
 using Ladder.Input;
 using Ladder.PlayerMovementHelpers;
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
 using Unity.Netcode;
-using UnityEditor;
 using UnityEngine;
 
 public class PlayerMovement : NetworkBehaviour
 {
     [SerializeField] private float speed;
-
     private ClientReconcile clientReconcile = null;
     public ServerQueue serverQueue = null;
     private ClientInterpolation interpolation = null;
-    private ClientTimeDilation timeDilation = null;
     private ServerInputAssumption extrapolation = null;
-    private ServerMessageRedundancy redundancy = null;
     [SerializeField] private bool Interpolate = false;
     [SerializeField] private bool Extrapolate = false;
+
+    [SerializeField] private int redundantMessages = 4;
+    [SerializeField] private int clientLeadTick = 5;
 
     private void Awake()
     {
         clientReconcile = GetComponent<ClientReconcile>();
         serverQueue = new ServerQueue(this);
-        timeDilation = GetComponent<ClientTimeDilation>();
     }
     public override void OnNetworkSpawn()
     {
@@ -36,8 +32,6 @@ public class PlayerMovement : NetworkBehaviour
         if (IsServer)
         {
             extrapolation = GetComponent<ServerInputAssumption>();
-            redundancy = GetComponent<ServerMessageRedundancy>();
-            redundancy.playerMovement = this;
         }
     }
     public override void OnNetworkDespawn()
@@ -49,19 +43,20 @@ public class PlayerMovement : NetworkBehaviour
     float TickTimer = 0;
     private void Update()
     {
-        TickSpeed = NetworkManager.Singleton.NetworkTickSystem.ServerTime.FixedDeltaTime;
-        if (!IsLocalPlayer) 
+
+        TickSpeed = NetworkManager.ServerTime.FixedDeltaTime;
+        if (!IsLocalPlayer)
         {
             if (Interpolate && interpolation != null)
             {
                 transform.position = interpolation.FindNextMove();
             }
         }
-        
-        if(IsLocalPlayer)
+
+        if (IsLocalPlayer)
         {
             TickTimer += Time.deltaTime;
-            if (TickTimer >= TickSpeed - timeDilation.CurrentTickOffset)
+            if (TickTimer >= TickSpeed)
             {
                 Vector2 MovementVector = InputManager.Move.normalized;
                 if (MovementVector != Vector2.zero)
@@ -70,14 +65,28 @@ public class PlayerMovement : NetworkBehaviour
                 }
                 if (!IsServer)
                 {
-                    clientReconcile.SendMovementMessage(MovementVector);
+                    SendMovementMessage(MovementVector);
                 }
                 TickTimer = 0;
             }
-            
+
         }
     }
-
+    public void SendMovementMessage(Vector2 movementVector)
+    {
+        clientReconcile.StampLocation((uint)NetworkManager.LocalTime.Tick + (uint)clientLeadTick, movementVector);
+        Dictionary<uint, Vector2> messages = clientReconcile.GrabPreviousInputs(redundantMessages, (uint)NetworkManager.LocalTime.Tick + (uint)clientLeadTick);
+        Vector2[] vector2s = new Vector2[messages.Count];
+        uint[] ids = new uint[messages.Count];
+        int i = 0;
+        foreach (KeyValuePair<uint, Vector2> message in messages)
+        {
+            vector2s[i] = message.Value;
+            ids[i] = message.Key;
+            i++;
+        }
+        MovementRequestRPC(vector2s, ids);
+    }
     private void OnTick()
     {
         if (IsServer)
@@ -85,41 +94,36 @@ public class PlayerMovement : NetworkBehaviour
             if (IsLocalPlayer)
             {
                 UpdatePositionRPC(transform.position, 0);
+                return;
             }
-            List<MessageBundle> queue = serverQueue.GetMessageQueue();
-            //queue.Sort((mes1, mes2) => { return mes1.Id.CompareTo(mes2.Id); });
-
-            // More Dangerous This will assume the client message was late and Create a new one to fill the gap
-            /*
-            if (queue.Count == 0)
+            MessageBundle nextMessage = new() { Id = (uint)NetworkManager.ServerTime.Tick, Input = Vector2.zero };
+            if (serverQueue.TryGetMessageAt((uint)NetworkManager.ServerTime.Tick, out MessageBundle message))
             {
-                Debug.Log("Message Was Late... Extrapolating");
-                extrapolation.ExtrapolateWithoutCare();
+                nextMessage = message;
+                serverQueue.SetGoodMessage(nextMessage);
+                serverQueue.RemoveMessageFromBuffer((uint)NetworkManager.ServerTime.Tick);
             }
-            else if (Extrapolate && extrapolation != null)
+            else
             {
-                queue = extrapolation.FindMissingMessage(queue);
-            }
-            */
-            /* 
-             * Extrapolation Finds Missing messages and returns a list with Guessed Inputs
-             * Will only Insert missing messages if the messages before and after the missing one were the same
-            */
-            redundancy.ApplyRedundancyToClient();
-            if (extrapolation != null)
-            {
-                if (Extrapolate)
+                if (Extrapolate && extrapolation != null)
                 {
-                    queue = extrapolation.FindMissingMessage(queue);
+                    if
+                        (
+                        serverQueue.LastGoodMessage.Input != Vector2.zero &&
+                        serverQueue.TryGetMessageAt((uint)NetworkManager.ServerTime.Tick + 1, out MessageBundle futureMessage)
+                        )
+                    {
+                        nextMessage = extrapolation.ExtrapolateMissingMessage
+                            (
+                            (uint)NetworkManager.ServerTime.Tick,
+                            serverQueue.LastGoodMessage, futureMessage
+                            );
+                    }
                 }
             }
-            foreach (MessageBundle message in queue)
-            {
-                
-                Movement(message.Input.normalized);
-                UpdatePositionRPC(transform.position, message.Id);
-            }
-            
+            Movement(nextMessage.Input.normalized);
+            UpdatePositionRPC(transform.position, nextMessage.Id);
+            //redundancy.ApplyRedundancyToClient();
         }
     }
 
@@ -143,9 +147,9 @@ public class PlayerMovement : NetworkBehaviour
     }
 
     [Rpc(SendTo.NotServer)]
-    public void UpdatePositionRPC(Vector2 NewPosition, ulong MessageId)
+    public void UpdatePositionRPC(Vector2 NewPosition, uint MessageId)
     {
-        if(IsLocalPlayer)
+        if (IsLocalPlayer)
         {
             clientReconcile.IsPredictionCorrect(NewPosition, MessageId);
             return;
@@ -162,16 +166,17 @@ public class PlayerMovement : NetworkBehaviour
         }
     }
 
+    //[Rpc(SendTo.Server, Delivery = RpcDelivery.Unreliable)]
+    //public void MovementRequestRPC(Vector2 ClientInputVector, uint MessageId)
+    //{
+    //    serverQueue.TryAddMessageToBuffer(ClientInputVector.normalized, MessageId);
+    //}
     [Rpc(SendTo.Server, Delivery = RpcDelivery.Unreliable)]
-    public void MovementRequestRPC(Vector2 ClientInputVector, ulong MessageId)
-    {
-        serverQueue.AddMessageToQueue(ClientInputVector.normalized, MessageId);
-    }
-    public void MovementRequestRPC(Vector2[] ClientInputVector, ulong[] MessageId)
+    public void MovementRequestRPC(Vector2[] ClientInputVector, uint[] MessageId)
     {
         for (int i = 0; i < MessageId.Length; i++)
         {
-            serverQueue.AddMessageToQueue(ClientInputVector[i].normalized, MessageId[i]);
+            serverQueue.TryAddMessageToBuffer(ClientInputVector[i].normalized, MessageId[i]);
         }
     }
 }

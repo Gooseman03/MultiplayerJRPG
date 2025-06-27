@@ -1,7 +1,6 @@
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
-using Unity.Netcode;
-using UnityEngine.SceneManagement;
 
 public class UIController : MonoBehaviour
 {

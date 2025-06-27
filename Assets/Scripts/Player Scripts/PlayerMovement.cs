@@ -12,9 +12,11 @@ public class PlayerMovement : NetworkBehaviour
     [SerializeField] private float speed;
 
     private ClientReconcile clientReconcile = null;
-    private ServerQueue serverQueue = null;
+    public ServerQueue serverQueue = null;
     private ClientInterpolation interpolation = null;
+    private ClientTimeDilation timeDilation = null;
     private ServerInputAssumption extrapolation = null;
+    private ServerMessageRedundancy redundancy = null;
     [SerializeField] private bool Interpolate = false;
     [SerializeField] private bool Extrapolate = false;
 
@@ -22,6 +24,7 @@ public class PlayerMovement : NetworkBehaviour
     {
         clientReconcile = GetComponent<ClientReconcile>();
         serverQueue = new ServerQueue(this);
+        timeDilation = GetComponent<ClientTimeDilation>();
     }
     public override void OnNetworkSpawn()
     {
@@ -33,6 +36,8 @@ public class PlayerMovement : NetworkBehaviour
         if (IsServer)
         {
             extrapolation = GetComponent<ServerInputAssumption>();
+            redundancy = GetComponent<ServerMessageRedundancy>();
+            redundancy.playerMovement = this;
         }
     }
     public override void OnNetworkDespawn()
@@ -56,7 +61,7 @@ public class PlayerMovement : NetworkBehaviour
         if(IsLocalPlayer)
         {
             TickTimer += Time.deltaTime;
-            if (TickTimer >= TickSpeed)
+            if (TickTimer >= TickSpeed - timeDilation.CurrentTickOffset)
             {
                 Vector2 MovementVector = InputManager.Move.normalized;
                 if (MovementVector != Vector2.zero)
@@ -100,6 +105,7 @@ public class PlayerMovement : NetworkBehaviour
              * Extrapolation Finds Missing messages and returns a list with Guessed Inputs
              * Will only Insert missing messages if the messages before and after the missing one were the same
             */
+            redundancy.ApplyRedundancyToClient();
             if (extrapolation != null)
             {
                 if (Extrapolate)
@@ -109,6 +115,7 @@ public class PlayerMovement : NetworkBehaviour
             }
             foreach (MessageBundle message in queue)
             {
+                
                 Movement(message.Input.normalized);
                 UpdatePositionRPC(transform.position, message.Id);
             }

@@ -1,15 +1,66 @@
 using System;
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.UIElements;
+using UnityEngine.Windows;
 
 namespace Ladder.PlayerMovementHelpers
 {
     [Serializable]
-    public struct MessageBundle
+    public struct MessageBundle : INetworkSerializable
+    {
+        public uint Id;
+        public Inputs Inputs;
+        
+        public bool IsAttacking
+        {
+            get => Inputs.IsAttacking;
+            set => Inputs.IsAttacking = value;
+        }
+        public Vector2 MoveInput
+        {
+            get
+            {
+                return Inputs.MoveInput;
+            }
+            set
+            {
+                Inputs.MoveInput = value;
+            }
+        }
+        public MessageBundle(MessageBundle ToCopy)
+        {
+            Inputs = new Inputs();
+            this.Id = ToCopy.Id;
+            MoveInput = ToCopy.MoveInput;
+            IsAttacking = ToCopy.IsAttacking;
+        }
+        public MessageBundle(uint Id, Vector2 vector , bool isAttacking)
+        {
+            Inputs = new Inputs();
+            this.Id = Id;
+            MoveInput = vector;
+            IsAttacking = isAttacking;
+        }
+        public MessageBundle(uint Id, Inputs inputs)
+        {
+            this.Id = Id;
+            this.Inputs = inputs;
+        }
+        public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+        {
+            serializer.SerializeValue(ref Id);
+            serializer.SerializeValue(ref Inputs);
+        }
+    }
+    public struct Inputs : INetworkSerializable
     {
         private float x;
         private float y;
-        public Vector2 Input
+        public bool IsAttacking;
+
+        public Vector2 MoveInput
         {
             get
             {
@@ -21,76 +72,67 @@ namespace Ladder.PlayerMovementHelpers
                 y = value.y;
             }
         }
-        public uint Id;
-        public MessageBundle(MessageBundle ToCopy)
+        public Inputs(Vector2 movementVector, bool isAttacking)
         {
-            this.Id = ToCopy.Id;
-            x = ToCopy.Input.x;
-            y = ToCopy.Input.y;
+            this.x = movementVector.x;
+            this.y = movementVector.y;
+            IsAttacking = isAttacking;
+        }
+        public Inputs(Inputs ToCopy)
+        {
+            this.x = ToCopy.x;
+            this.y = ToCopy.y;
+            IsAttacking = ToCopy.IsAttacking;
+        }
+
+        public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+        {
+            serializer.SerializeValue(ref x);
+            serializer.SerializeValue(ref y);
+            serializer.SerializeValue(ref IsAttacking);
         }
     }
     public class ServerQueue
     {
-        private PlayerMovement owner = null;
-        public ServerQueue(PlayerMovement owner)
+        private Dictionary<uint, Inputs> messageBuffer = new Dictionary<uint, Inputs>(); // Dictionary of Messages Recieved from the client the key is the messageId
+        public MessageBundle LastGoodMessage = new MessageBundle(); // Contains the Last Message that was successfully ran
+        /* 
+         * Takes in the tick of the when the message was sent and a Set of Inputs
+         * Creates a MessageBundle with those and stores it in LastGoodMessage
+        */
+        public void SetGoodMessage(uint time,Inputs inputs)
         {
-            this.owner = owner;
+            LastGoodMessage = new MessageBundle(time, inputs);
         }
-        public MessageBundle LastGoodMessage = new MessageBundle();
-        public void SetGoodMessage(MessageBundle message)
+        
+        /* 
+         * Takes in the current Tick and attempts to add more messages to the buffer
+         * If the message is already in the buffer or if the server is past the intended tick for it will be dicarded
+         */
+        public void TryAddMessageToBuffer(uint time, MessageBundle message)
         {
-            LastGoodMessage = message;
+            if (message.Id <= time) { return; }
+            messageBuffer.TryAdd(message.Id, message.Inputs);
         }
-
-        private Dictionary<uint, Vector2> messageBuffer = new Dictionary<uint, Vector2>();
-        public void TryAddMessageToBuffer(Vector2 ClientInputVector, uint MessageId)
+        /* 
+         * Takes in a index and outputs the message if it exists in the buffer.
+         * If it cant find the index it will return false. 
+         */
+        public bool TryGetInputsAt(uint messageId, out Inputs inputs)
         {
-            if (MessageId <= owner.NetworkManager.ServerTime.Tick) { return; }
-            messageBuffer.TryAdd(MessageId, ClientInputVector);
-        }
-        public bool TryGetMessageAt(uint messageId, out MessageBundle message)
-        {
-            message = new();
-            if (messageBuffer.TryGetValue(messageId, out Vector2 messageVector))
+            inputs = new();
+            if (messageBuffer.TryGetValue(messageId, out Inputs foundInputs))
             {
-                message = new() { Id = messageId, Input = messageVector };
+                inputs = foundInputs;
                 return true;
             }
             return false;
         }
+
+        // Will remove the message from the buffer at the index supplied
         public void RemoveMessageFromBuffer(uint MessageId)
         {
             messageBuffer.Remove(MessageId);
         }
-
-        /*
-        [SerializeField] private List<MessageBundle> MessageQueue = new();
-        [SerializeField] private List<MessageBundle> HistoryQueue = new();
-        public void AddMessageToQueue(Vector2 ClientInputVector, uint MessageId)
-        {
-            MessageQueue.Insert(MessageQueue.FindLastIndex((mes) => mes.Id <= MessageId) + 1,
-                new() {
-                    Id = MessageId, Input = ClientInputVector 
-                });
-        }
-        public List<MessageBundle> GetMessageQueue()
-        {
-            List<MessageBundle> queue = new(MessageQueue);
-            MessageQueue.Clear();
-            HistoryQueue.AddRange(queue);
-            return queue;
-        }
-        public List<MessageBundle> GetHistoryQueue()
-        {
-            List<MessageBundle> queue = new(HistoryQueue);
-            // Will need to be cleared at some point. Otherwise look forwards to memory leaks
-            // Look into making a replay file where the contents of HistoryQueue are stored in a file which is regularly updated to keep memory usage low
-            return queue;
-        }
-        public void ForEach(Action<MessageBundle> action)
-        {
-            MessageQueue.ForEach(action);
-        }
-        */
     }
 }

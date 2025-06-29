@@ -3,48 +3,33 @@ using Ladder.PlayerMovementHelpers;
 using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class PlayerMovement : NetworkBehaviour
 {
     [SerializeField] private float speed;
-    private ClientReconcile clientReconcile = null;
-    public ServerQueue serverQueue = null;
-    private ClientInterpolation interpolation = null;
-    private ServerInputAssumption extrapolation = null;
-    [SerializeField] private bool Interpolate = false;
-    [SerializeField] private bool Extrapolate = false;
 
-    [SerializeField] private int redundantMessages = 4;
-    [SerializeField] private int clientLeadTick = 5;
-
-    private void Awake()
-    {
-        clientReconcile = GetComponent<ClientReconcile>();
-        serverQueue = new ServerQueue(this);
-    }
+    private PlayerController controller; // Reference to the PlayerController
+    private ClientInterpolation interpolation = null; // Reference to the Interpolator
+    public bool Interpolate = false;
+    private List<RaycastHit2D> raycastHits = new List<RaycastHit2D>();
+    [SerializeField] private LayerMask collisionMask;
+    private Vector2 colliderSize;
+    [SerializeField] private float skinWidth = 0.1f;
+    // Assigns necessary references 
     public override void OnNetworkSpawn()
     {
-        NetworkManager.NetworkTickSystem.Tick += OnTick;
+        controller = GetComponent<PlayerController>();
         if (!IsLocalPlayer && !IsServer)
         {
             interpolation = GetComponent<ClientInterpolation>();
         }
-        if (IsServer)
-        {
-            extrapolation = GetComponent<ServerInputAssumption>();
-        }
-    }
-    public override void OnNetworkDespawn()
-    {
-        NetworkManager.NetworkTickSystem.Tick -= OnTick;
+        colliderSize = transform.localScale;
     }
 
-    float TickSpeed = 0;
-    float TickTimer = 0;
+    // Ticks the Interpolater to the next position if enabled
     private void Update()
     {
-
-        TickSpeed = NetworkManager.ServerTime.FixedDeltaTime;
         if (!IsLocalPlayer)
         {
             if (Interpolate && interpolation != null)
@@ -52,89 +37,58 @@ public class PlayerMovement : NetworkBehaviour
                 transform.position = interpolation.FindNextMove();
             }
         }
-
-        if (IsLocalPlayer)
-        {
-            TickTimer += Time.deltaTime;
-            if (TickTimer >= TickSpeed)
-            {
-                Vector2 MovementVector = InputManager.Move.normalized;
-                if (MovementVector != Vector2.zero)
-                {
-                    Movement(MovementVector);
-                }
-                if (!IsServer)
-                {
-                    SendMovementMessage(MovementVector);
-                }
-                TickTimer = 0;
-            }
-
-        }
     }
-    public void SendMovementMessage(Vector2 movementVector)
+    // Will Convert the vector2 Supplied into a Movement vector
+    // Assumes supplied Vector2 will be normalized in the rpc
+    public void Movement(Vector2 movementVector)
     {
-        clientReconcile.StampLocation((uint)NetworkManager.LocalTime.Tick + (uint)clientLeadTick, movementVector);
-        Dictionary<uint, Vector2> messages = clientReconcile.GrabPreviousInputs(redundantMessages, (uint)NetworkManager.LocalTime.Tick + (uint)clientLeadTick);
-        Vector2[] vector2s = new Vector2[messages.Count];
-        uint[] ids = new uint[messages.Count];
-        int i = 0;
-        foreach (KeyValuePair<uint, Vector2> message in messages)
+        float deltaTime = NetworkManager.Singleton.NetworkTickSystem.ServerTime.FixedDeltaTime;
+        
+        Vector2 desiredMove = movementVector * speed * deltaTime;
+        if (desiredMove.x != 0)
         {
-            vector2s[i] = message.Value;
-            ids[i] = message.Key;
-            i++;
-        }
-        MovementRequestRPC(vector2s, ids);
-    }
-    private void OnTick()
-    {
-        if (IsServer)
-        {
-            if (IsLocalPlayer)
+            Vector2 xMove = new Vector2(desiredMove.x, 0);
+            if (!IsColliding(xMove))
             {
-                UpdatePositionRPC(transform.position, 0);
-                return;
-            }
-            MessageBundle nextMessage = new() { Id = (uint)NetworkManager.ServerTime.Tick, Input = Vector2.zero };
-            if (serverQueue.TryGetMessageAt((uint)NetworkManager.ServerTime.Tick, out MessageBundle message))
-            {
-                nextMessage = message;
-                serverQueue.SetGoodMessage(nextMessage);
-                serverQueue.RemoveMessageFromBuffer((uint)NetworkManager.ServerTime.Tick);
+                transform.position += (Vector3)xMove;
             }
             else
             {
-                if (Extrapolate && extrapolation != null)
-                {
-                    if
-                        (
-                        serverQueue.LastGoodMessage.Input != Vector2.zero &&
-                        serverQueue.TryGetMessageAt((uint)NetworkManager.ServerTime.Tick + 1, out MessageBundle futureMessage)
-                        )
-                    {
-                        nextMessage = extrapolation.ExtrapolateMissingMessage
-                            (
-                            (uint)NetworkManager.ServerTime.Tick,
-                            serverQueue.LastGoodMessage, futureMessage
-                            );
-                    }
-                }
+                float safeMove = GetSafeMoveDistance(xMove);
+                transform.position += new Vector3((safeMove * xMove.normalized).x, 0, 0);
             }
-            Movement(nextMessage.Input.normalized);
-            UpdatePositionRPC(transform.position, nextMessage.Id);
-            //redundancy.ApplyRedundancyToClient();
+        }
+        if (desiredMove.y != 0)
+        {
+            Vector2 yMove = new Vector2(0, desiredMove.y);
+            if (!IsColliding(yMove))
+            {
+                transform.position += (Vector3)yMove;
+            }
+            else
+            {
+                float safeMove = GetSafeMoveDistance(yMove);
+                transform.position += new Vector3(0, (safeMove * yMove.normalized).y, 0);
+            }
         }
     }
 
-    //Assumes Vector2 will be normalized in the rpc
-    public void Movement(Vector2 movementVector)
+    private bool IsColliding(Vector2 move)
     {
-        // Length of one tick
-        float deltaTime = NetworkManager.Singleton.NetworkTickSystem.ServerTime.FixedDeltaTime;
-        MovePlayer(movementVector * speed * deltaTime);
+        RaycastHit2D hit = Physics2D.BoxCast(transform.position, colliderSize, 0f, move.normalized, move.magnitude + skinWidth, collisionMask);
+        return hit.collider != null;
     }
 
+    private float GetSafeMoveDistance(Vector2 move)
+    {
+        RaycastHit2D hit = Physics2D.BoxCast(transform.position, colliderSize, 0f, move.normalized, move.magnitude + skinWidth, collisionMask);
+        if (hit.collider == null) return move.magnitude;
+
+        float distanceToHit = hit.distance - skinWidth;
+        return Mathf.Max(distanceToHit, 0f);
+    }
+
+    // Moves the Transform to the vector2 supplied will assume z is 0 
     void MovePlayer(Vector2 vector2)
     {
         Vector3 NewPosition = new Vector3
@@ -145,38 +99,29 @@ public class PlayerMovement : NetworkBehaviour
             );
         transform.position = NewPosition;
     }
-
-    [Rpc(SendTo.NotServer)]
-    public void UpdatePositionRPC(Vector2 NewPosition, uint MessageId)
+    /* 
+     * If the interpolater is enabled it will insert newPosition as the next position for the interpolator
+     * Otherwise it will just set the position of the tranform to newPosition
+     */
+    public void OnNewPositionRecieved(Vector2 newPosition)
     {
-        if (IsLocalPlayer)
+        if (Interpolate && interpolation != null)
         {
-            clientReconcile.IsPredictionCorrect(NewPosition, MessageId);
+            interpolation.SetRecievedPosition(newPosition);
             return;
         }
-        else
-        {
-            if (Interpolate && interpolation != null)
-            {
-                interpolation.SetRecievedPosition(NewPosition);
-                return;
-            }
-            transform.position = NewPosition;
-            return;
-        }
+        transform.position = newPosition;
+        return;
     }
 
-    //[Rpc(SendTo.Server, Delivery = RpcDelivery.Unreliable)]
-    //public void MovementRequestRPC(Vector2 ClientInputVector, uint MessageId)
-    //{
-    //    serverQueue.TryAddMessageToBuffer(ClientInputVector.normalized, MessageId);
-    //}
-    [Rpc(SendTo.Server, Delivery = RpcDelivery.Unreliable)]
-    public void MovementRequestRPC(Vector2[] ClientInputVector, uint[] MessageId)
+    public void OnDrawGizmos()
     {
-        for (int i = 0; i < MessageId.Length; i++)
+        foreach( RaycastHit2D hit2D in raycastHits)
         {
-            serverQueue.TryAddMessageToBuffer(ClientInputVector[i].normalized, MessageId[i]);
+            Gizmos.color = Color.green;
+            Gizmos.DrawCube(hit2D.point, new Vector3(1, 1, 0.1f));
+            Gizmos.color = Color.red;
+            Gizmos.DrawSphere( hit2D.point , 0.1f);
         }
     }
 }

@@ -12,29 +12,15 @@ public class ServerInputAssumption : NetworkBehaviour
      * if the Message before and after are the same It will Extrapolate the new message as the same 
      * otherwise it will return a message of no input
     */
-    public MessageBundle ExtrapolateMissingMessage(uint index, MessageBundle message1, MessageBundle message2)
+    public Inputs ExtrapolateMissingInputs(Inputs inputs1, Inputs inputs2)
     {
-
         Debug.Log("Message Was Missing... Extrapolating");
-        if (message1.Input == message2.Input)
+        if (inputs1.MoveInput == inputs2.MoveInput)
         {
-            Debug.Log("New Message Created At " + index + " The Extrapolated Input was " + message1.Input);
-            return new MessageBundle() { Id = index, Input = message1.Input };
+            Debug.Log("New Message Created at " + (uint)NetworkManager.ServerTime.Tick + " The Extrapolated Input was " + inputs1.MoveInput);
+            return new Inputs(inputs1);
         }
-
-        return (new MessageBundle() { Id = index, Input = Vector2.zero });
+        Debug.Log("Input was Changed Between Messages... Cancelling");
+        return new Inputs(Vector2.zero, false);
     }
 }
-/*
-public int countLostPackets(List<MessageBundle> newMessages)
-{
-    uint tempLastMessageId = lastMessage.Id;
-    int LostPackets = 0;
-    foreach (MessageBundle message in newMessages)
-    {
-        LostPackets += (int)(message.Id - tempLastMessageId + 1);
-        tempLastMessageId = message.Id;
-    }
-    return LostPackets;
-}
-*/

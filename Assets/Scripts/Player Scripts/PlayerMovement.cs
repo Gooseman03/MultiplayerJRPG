@@ -50,12 +50,12 @@ public class PlayerMovement : NetworkBehaviour
             Vector2 xMove = new Vector2(desiredMove.x, 0);
             if (!IsColliding(xMove))
             {
-                transform.position += (Vector3)xMove;
+                MovePlayer(xMove);
             }
             else
             {
                 float safeMove = GetSafeMoveDistance(xMove);
-                transform.position += new Vector3((safeMove * xMove.normalized).x, 0, 0);
+                MovePlayer(new((safeMove * xMove.normalized).x, 0));
             }
         }
         if (desiredMove.y != 0)
@@ -63,12 +63,12 @@ public class PlayerMovement : NetworkBehaviour
             Vector2 yMove = new Vector2(0, desiredMove.y);
             if (!IsColliding(yMove))
             {
-                transform.position += (Vector3)yMove;
+                MovePlayer(yMove);
             }
             else
             {
                 float safeMove = GetSafeMoveDistance(yMove);
-                transform.position += new Vector3(0, (safeMove * yMove.normalized).y, 0);
+                MovePlayer(new(0, (safeMove * yMove.normalized).y));
             }
         }
     }

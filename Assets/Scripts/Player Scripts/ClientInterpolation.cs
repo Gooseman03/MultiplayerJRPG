@@ -5,8 +5,8 @@ public class ClientInterpolation : NetworkBehaviour
 {
     private Vector3 recievedPosition = Vector3.zero;
     private Vector3 transformWhenRecieved = Vector3.zero;
-
     private float time = 0;
+
     [SerializeField] private float InterpolationSpeed = 10;
     public void SetRecievedPosition(Vector3 newPosition)
     {

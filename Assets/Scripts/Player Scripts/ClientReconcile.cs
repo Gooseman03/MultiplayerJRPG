@@ -19,7 +19,7 @@ namespace Ladder.PlayerMovementHelpers
         /* 
          * Takes in the current Tick and what the Inputs were this tick and stores them for reconciliation with the server
          */
-        public void RecordGameState(uint time,Inputs message)
+        public void RecordGameState(uint time, Inputs message)
         {
             PreviousMessages.Add(time, message);
             PreviousLocations.Add(time, new(transform.position.x, transform.position.y));
@@ -39,7 +39,7 @@ namespace Ladder.PlayerMovementHelpers
          */
         public MessageBundle[] GrabPreviousInputs(uint StartIndex, int count)
         {
-            List<MessageBundle> result = new ();
+            List<MessageBundle> result = new();
             for (uint i = 0; i < count; i++)
             {
                 if (PreviousMessages.TryGetValue(StartIndex - i, out Inputs message))
@@ -90,7 +90,7 @@ namespace Ladder.PlayerMovementHelpers
         // For Now just calls Resync Position Should be used in future to call all reconciliation functions
         public void Resync(Vector2 NewPosition, uint MessageId)
         {
-            ResyncPosition(NewPosition,MessageId);
+            ResyncPosition(NewPosition, MessageId);
         }
 
         // Resynchronizes the player's position when a mismatch between predicted and actual position is detected.

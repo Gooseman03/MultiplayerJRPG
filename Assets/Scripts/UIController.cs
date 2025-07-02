@@ -17,7 +17,7 @@ public class UIController : MonoBehaviour
         clientButton.onClick.AddListener(() =>
         {
 
-            if (!IsValidIp (ipField.text))
+            if (IsValidIp (ipField.text))
             {
                 Debug.Log(ipField.text + " is a valid IP address.");
             }

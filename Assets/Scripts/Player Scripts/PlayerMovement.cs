@@ -5,42 +5,17 @@ using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-public class PlayerMovement : NetworkBehaviour
+public class PlayerMovement : MonoBehaviour
 {
     [SerializeField] private float speed;
 
-    private PlayerController controller; // Reference to the PlayerController
-    private ClientInterpolation interpolation = null; // Reference to the Interpolator
-    public bool Interpolate = false;
-    private List<RaycastHit2D> raycastHits = new List<RaycastHit2D>();
-    [SerializeField] private LayerMask collisionMask;
-    private Vector2 colliderSize;
-    [SerializeField] private float skinWidth = 0.1f;
-    // Assigns necessary references 
-    public override void OnNetworkSpawn()
-    {
-        controller = GetComponent<PlayerController>();
-        if (!IsLocalPlayer && !IsServer)
-        {
-            interpolation = GetComponent<ClientInterpolation>();
-        }
-        colliderSize = transform.localScale;
-    }
+    // Collision Variables
+    private List<RaycastHit2D> raycastHits = new List<RaycastHit2D>(); 
+    [SerializeField] private LayerMask collisionMask; // What layers the player can collide with
+    [SerializeField] private float skinWidth = 0.1f;  // A Extra Buffer when doing collision checks
 
-    // Ticks the Interpolater to the next position if enabled
-    private void Update()
-    {
-        if (!IsLocalPlayer)
-        {
-            if (Interpolate && interpolation != null)
-            {
-                transform.position = interpolation.FindNextMove();
-            }
-        }
-    }
-    // Will Convert the vector2 Supplied into a Movement vector
-    // Assumes supplied Vector2 will be normalized in the rpc
-    public void Movement(Vector2 movementVector)
+    // Moves the player as by the vector input and if there is a collision stop there
+    public void MovePlayerWithCollisions(Vector2 movementVector)
     {
         float deltaTime = NetworkManager.Singleton.NetworkTickSystem.ServerTime.FixedDeltaTime;
         
@@ -75,13 +50,13 @@ public class PlayerMovement : NetworkBehaviour
 
     private bool IsColliding(Vector2 move)
     {
-        RaycastHit2D hit = Physics2D.BoxCast(transform.position, colliderSize, 0f, move.normalized, move.magnitude + skinWidth, collisionMask);
+        RaycastHit2D hit = Physics2D.BoxCast(transform.position, transform.localScale, 0f, move.normalized, move.magnitude + skinWidth, collisionMask);
         return hit.collider != null;
     }
 
     private float GetSafeMoveDistance(Vector2 move)
     {
-        RaycastHit2D hit = Physics2D.BoxCast(transform.position, colliderSize, 0f, move.normalized, move.magnitude + skinWidth, collisionMask);
+        RaycastHit2D hit = Physics2D.BoxCast(transform.position, transform.localScale, 0f, move.normalized, move.magnitude + skinWidth, collisionMask);
         if (hit.collider == null) return move.magnitude;
 
         float distanceToHit = hit.distance - skinWidth;
@@ -98,30 +73,5 @@ public class PlayerMovement : NetworkBehaviour
             0
             );
         transform.position = NewPosition;
-    }
-    /* 
-     * If the interpolater is enabled it will insert newPosition as the next position for the interpolator
-     * Otherwise it will just set the position of the tranform to newPosition
-     */
-    public void OnNewPositionRecieved(Vector2 newPosition)
-    {
-        if (Interpolate && interpolation != null)
-        {
-            interpolation.SetRecievedPosition(newPosition);
-            return;
-        }
-        transform.position = newPosition;
-        return;
-    }
-
-    public void OnDrawGizmos()
-    {
-        foreach( RaycastHit2D hit2D in raycastHits)
-        {
-            Gizmos.color = Color.green;
-            Gizmos.DrawCube(hit2D.point, new Vector3(1, 1, 0.1f));
-            Gizmos.color = Color.red;
-            Gizmos.DrawSphere( hit2D.point , 0.1f);
-        }
     }
 }

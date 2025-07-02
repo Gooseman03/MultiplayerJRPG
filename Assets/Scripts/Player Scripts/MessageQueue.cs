@@ -1,3 +1,4 @@
+using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using Unity.Netcode;
@@ -59,7 +60,18 @@ namespace Ladder.PlayerMovementHelpers
         private float x;
         private float y;
         public bool IsAttacking;
-
+        public Vector2 Position
+        {
+            get
+            {
+                return new Vector2(x, y);
+            }
+            set
+            {
+                x = value.x;
+                y = value.y;
+            }
+        }
         public Vector2 MoveInput
         {
             get
@@ -72,12 +84,13 @@ namespace Ladder.PlayerMovementHelpers
                 y = value.y;
             }
         }
-        public Inputs(Vector2 movementVector, bool isAttacking)
+        public Inputs(Vector2 vector, bool isAttacking)
         {
-            this.x = movementVector.x;
-            this.y = movementVector.y;
+            this.x = vector.x;
+            this.y = vector.y;
             IsAttacking = isAttacking;
         }
+
         public Inputs(Inputs ToCopy)
         {
             this.x = ToCopy.x;
@@ -92,19 +105,22 @@ namespace Ladder.PlayerMovementHelpers
             serializer.SerializeValue(ref IsAttacking);
         }
     }
-    public class ServerQueue
+    public class MessageQueue
     {
-        private Dictionary<uint, Inputs> messageBuffer = new Dictionary<uint, Inputs>(); // Dictionary of Messages Recieved from the client the key is the messageId
-        public MessageBundle LastGoodMessage = new MessageBundle(); // Contains the Last Message that was successfully ran
-        /* 
-         * Takes in the tick of the when the message was sent and a Set of Inputs
-         * Creates a MessageBundle with those and stores it in LastGoodMessage
-        */
-        public void SetGoodMessage(uint time,Inputs inputs)
+        public Dictionary<uint, Inputs> messageBuffer = new Dictionary<uint, Inputs>(); // Dictionary of Messages Received the key is the messageId
+
+        public Inputs this[uint key]
         {
-            LastGoodMessage = new MessageBundle(time, inputs);
+            get => messageBuffer[key];
+            set => messageBuffer[key] = value;
         }
-        
+
+        public MessageQueue(uint id,Inputs inputsInit)
+        {
+            messageBuffer[id] = inputsInit;
+        }
+        public MessageQueue() { }
+
         /* 
          * Takes in the current Tick and attempts to add more messages to the buffer
          * If the message is already in the buffer or if the server is past the intended tick for it will be dicarded
@@ -114,11 +130,16 @@ namespace Ladder.PlayerMovementHelpers
             if (message.Id <= time) { return; }
             messageBuffer.TryAdd(message.Id, message.Inputs);
         }
+        // Forces the message into the buffer overwriting previously held Key
+        public void ForceAddMessageToBuffer(MessageBundle message)
+        {
+            messageBuffer[message.Id] = message.Inputs;
+        }
         /* 
          * Takes in a index and outputs the message if it exists in the buffer.
          * If it cant find the index it will return false. 
          */
-        public bool TryGetInputsAt(uint messageId, out Inputs inputs)
+        public bool TryGetInput(uint messageId, out Inputs inputs)
         {
             inputs = new();
             if (messageBuffer.TryGetValue(messageId, out Inputs foundInputs))
@@ -129,10 +150,20 @@ namespace Ladder.PlayerMovementHelpers
             return false;
         }
 
+        public bool TryAdd(uint messageId, Inputs input)
+        {
+            if (messageBuffer.TryAdd(messageId, input))
+            {
+                return true;
+            }
+            return false;
+        }
         // Will remove the message from the buffer at the index supplied
         public void RemoveMessageFromBuffer(uint MessageId)
         {
             messageBuffer.Remove(MessageId);
         }
+
+        public bool ContainsKey(uint key) => messageBuffer.ContainsKey(key); 
     }
 }

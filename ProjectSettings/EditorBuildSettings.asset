@@ -11,10 +11,10 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/SampleScene.unity
     guid: 99c9720ab356a0642a771bea13969a05
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/MultiplayerPredictMovement.unity
     guid: fbae4305ccf34d94c9b0c9e8a37f3bf4
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/TestClientConnectivity.unity
     guid: 63246061c7b8534418091db2a20067dd
   m_configObjects:

@@ -6,113 +6,135 @@ using UnityEngine;
 
 public class PlayerController : NetworkBehaviour
 {
-    public ServerQueue Queue = null; // Queue storing input messages for server-side processing
-    public PlayerMovement playerMovement = null; // Reference to the Movement script
+    [HideInInspector]
+    public MessageQueue Queue = new MessageQueue(); // Stores input messages for server-side processing
+    [HideInInspector]
+    public PlayerMovement playerMovement = null; // Reference to the movement script
 
-    private ClientReconcile clientReconcile = null; // Client-side reconciliation for correcting incorrect predictions
-    private ServerInputAssumption extrapolation = null; // Handles extrapolation when inputs are missing
+    private ClientReconcile clientReconcile = null; // Handles client-side prediction correction
+    private Interpolation interpolator = null; // Smooths other clients' movement on this client
 
-    [SerializeField] private bool Extrapolate = false; // Enable extrapolation for missing client inputs
-    [SerializeField] private int redundantMessages = 4; // Number of past input messages to resend to mitigate packet loss
-    [SerializeField] private int maxRedundantMessages = 10;
-    [SerializeField] private int clientLeadTick = 4; // Tick offset to allow client prediction ahead of the server
+    [Header("Buffer System")]
+    [Tooltip("Number of past inputs the client sends to the server.\nDefault is 4.")]
+    [SerializeField] private int redundantMessages = 4;
+    [Tooltip("Maximum number of redundant messages the buffer health system can use.\nDefault is 8.")]
+    [SerializeField] private int maxRedundantMessages = 8;
+    [Tooltip("Number of ticks the client leads ahead of the server.\nDefault is 4.")]
+    [SerializeField] private int clientLeadTick = 3;
+
+    // Custom tick system variables 
+    private double TickSpeed = 0;   // Time between ticks
+    private double TickTimer = 0;   // Timer tracking tick intervals
+    private double TickOffset = 0;  // Adjustment for speeding up/slowing down ticks
 
     private void Awake()
     {
         clientReconcile = GetComponent<ClientReconcile>();
-        Queue = new ServerQueue();
     }
     public override void OnNetworkSpawn()
     {
         playerMovement = GetComponent<PlayerMovement>();
         NetworkManager.NetworkTickSystem.Tick += OnTick;
         
-        // If this is the server, initialize extrapolation logic
-        if (IsServer)
+        if (IsLocalPlayer)
         {
-            extrapolation = GetComponent<ServerInputAssumption>();
+            gameObject.AddComponent<CameraController>();
         }
-
-        DebugMultiplayerUi.Instance.ExtrapolationToggle.onValueChanged.AddListener((value) => { Extrapolate = value; });
-        DebugMultiplayerUi.Instance.InterpolationToggle.onValueChanged.AddListener((value) => { playerMovement.Interpolate = value; });
+        if (!IsLocalPlayer)
+        {
+            if (IsServer)
+            {
+                interpolator = gameObject.AddComponent<HostInterpolation>();
+            }
+            else
+            {
+                interpolator = gameObject.AddComponent<ClientInterpolation>();
+            }
+            interpolator.controller = this;
+        }
+        //DebugMultiplayerUi.Instance.ExtrapolationToggle.onValueChanged.AddListener((value) => { Extrapolate = value; });
+        //DebugMultiplayerUi.Instance.InterpolationToggle.onValueChanged.AddListener((value) => { playerMovement.Interpolate = value; });
         DebugMultiplayerUi.Instance.AheadTicksSlider.onValueChanged.AddListener((value) => { clientLeadTick = (int)value; });
         DebugMultiplayerUi.Instance.RedundantTicksSlider.onValueChanged.AddListener((value) => { redundantMessages = (int)value; });
     }
-
     public override void OnNetworkDespawn()
     {
         // Unsubscribe from tick updates when despawned
         NetworkManager.NetworkTickSystem.Tick -= OnTick;
     }
 
-    // Sends input to the server (along with redundant messages for reliability)
-    public void SendInputsMessage(Vector2 movementVector, bool isAttacking)
+    // Sends the current and recent inputs to the server for prediction and reconciliation
+    private void SendInputsMessage(Vector2 movementVector, bool isAttacking)
     {
+        // Create an input bundle from the current state
         Inputs bundle = new Inputs(movementVector, isAttacking);
-        uint futureTick = (uint)NetworkManager.LocalTime.Tick + (uint)clientLeadTick;
-        
-        // Checks if the current tick has been run multiple times
-        if (clientReconcile.DoesPreviousInputExistAt(futureTick)) 
-        {
-            // Grab recent input history to send to server (includes redundant messages)
-            MessageBundle[] messagesToSend = clientReconcile.GrabPreviousInputs(futureTick, redundantMessages);
 
-            // Send input messages to the server
+        // Calculate the tick that will be processed next
+        uint tickBeingRan = (uint)NetworkManager.LocalTime.Tick + (uint)clientLeadTick;
+
+        // If this tick has already been processed locally, just resend redundant input history
+        if (clientReconcile.CheckForInputAt(tickBeingRan))
+        {
+            // Get recent redundant messages to send to the server
+            MessageBundle[] messagesToSend = clientReconcile.GrabRedundantMessages(tickBeingRan, redundantMessages);
+
+            // Send them to the server (reliable delivery isn't required)
             InputReportRPC(messagesToSend);
             return;
         }
 
-        // Record the game state for future reconciliation
-        clientReconcile.RecordGameState(futureTick, bundle);
+        // Record the current input so it can be used later for reconciliation
+        clientReconcile.RecordGameState(tickBeingRan, bundle);
 
-        // Grab recent input history to send to server (includes redundant messages)
-        // This Includes the Input that was most recently Executed
-        MessageBundle[] messages = clientReconcile.GrabPreviousInputs(futureTick, redundantMessages + 1);
+        // Get the full input history, including the current input (which was just recorded)
+        MessageBundle[] messages = clientReconcile.GrabRedundantMessages(tickBeingRan, redundantMessages + 1);
 
-        // Send input messages to the server
+        // Send the inputs to the server
         InputReportRPC(messages);
     }
-
-    double TickSpeed = 0; // Interval between ticks
-    double TickTimer = 0; // Timer tracking time elapsed between ticks
-    double TickOffset = 0; // To speed up or slow down Ticks
 
     private void Update()
     {
         TickSpeed = NetworkManager.ServerTime.FixedDeltaTime;
         
-        // Only run input logic for the local player
+        // Only run input logic only for the local player
         if (IsLocalPlayer)
         {
             TickTimer += Time.deltaTime;
 
             if (TickTimer >= TickSpeed - TickOffset)
             {
-                Vector2 MovementVector = InputManager.Move.normalized;
-                bool IsAttacking = InputManager.Attack;
-
-                // Apply Locally Predicted Movement
-                if (MovementVector != Vector2.zero)
-                {
-                    playerMovement.Movement(MovementVector);
-
-                    // Sends Inputs to the server (Client-side only)
-                    if (!IsServer)
-                    {
-                        SendInputsMessage(MovementVector, IsAttacking);
-                    }
-                }
-
-                TickTimer = 0; // Reset tick timer
+                OnCustomTick();
             }
         }
     }
+    // Called in the update when the custom ticks trigger
+    private void OnCustomTick()
+    {
+        Vector2 MovementVector = InputManager.Move.normalized;
+        bool IsAttacking = InputManager.Attack;
 
-    // Calculates the tick offset and trys to keep it near the target will increase and decrease as needed
+        if (MovementVector != Vector2.zero)
+        {
+            // Apply movement locally
+            playerMovement.MovePlayerWithCollisions(MovementVector);
+
+            // Send inputs to server (if not host)
+            if (!IsServer)
+            {
+                SendInputsMessage(MovementVector, IsAttacking);
+            }
+        }
+        TickTimer = 0; // Reset tick timer
+    }
+
+    // Dynamically adjusts tick offset and redundancy based on buffer health
     private void AdjustTickOffsetBasedOnBuffer(int actual, int target)
     {
+        // Set a tolerance so we don't constantly change the tickrate
         int tolerance = 1;
 
+        // If the buffer is too small, increase the tick rate and redundantMessages to account for possible packetloss
         if (actual < target - tolerance)
         {
             TickOffset = NetworkManager.NetworkTickSystem.LocalTime.TickOffset / 30;
@@ -121,111 +143,98 @@ public class PlayerController : NetworkBehaviour
                 redundantMessages++;
             }
         }
+        // If the buffer is too large, decrease the tick rate and reduce redundantMessages (but not below 0) so we don't hog bandwidth
         else if (actual > target + tolerance)
         {
             TickOffset = -NetworkManager.NetworkTickSystem.LocalTime.TickOffset / 30;
             redundantMessages = Mathf.Max(0, redundantMessages - 1);
         }
         else
+        // If we’re on time, make no changes
         {
             TickOffset = 0;
         }
     }
 
-
-    //bool PlayerStopped = false;
-    // Called Every Network Tick
+    // Server-side tick processing
     private void OnTick()
     {
         if (IsServer)
         {
-            // If this is the host player, just send current position and return
+            // If this is the host player, just send current position to clients and return
             if (IsLocalPlayer)
             {
-                UpdatePositionRPC(transform.position, 0);
+                UpdatePositionRPC((uint)NetworkManager.LocalTime.Tick,new (transform.position, InputManager.Attack));
                 return;
             }
 
+            // Set a default inputs incase the client didnt send a message this assumes no input from the player
             Inputs nextInputs = new();
             // Try to get input for the current tick from the message queue
-            if (Queue.TryGetInputsAt((uint)NetworkManager.ServerTime.Tick, out Inputs inputs))
+            // If its found set that as the next inputs to run and delete all inputs before then
+            if (Queue.TryGetInput((uint)NetworkManager.LocalTime.Tick, out Inputs inputs))
             {
                 nextInputs = inputs;
-                Queue.SetGoodMessage((uint)NetworkManager.ServerTime.Tick, nextInputs);
-                Queue.RemoveMessageFromBuffer((uint)NetworkManager.ServerTime.Tick);
+                Queue.RemoveMessageFromBuffer((uint)NetworkManager.LocalTime.Tick - 30);
             }
-            else
-            {
-                // Extrapolate if missing inputs and extrapolation is enabled
-                if (Extrapolate && extrapolation != null)
-                {
-                    if
-                        (
-                        Queue.LastGoodMessage.MoveInput != Vector2.zero &&
-                        Queue.TryGetInputsAt((uint)NetworkManager.ServerTime.Tick + 1, out Inputs futureInputs)
-                        )
-                    {
-                        nextInputs = extrapolation.ExtrapolateMissingInputs(Queue.LastGoodMessage.Inputs, futureInputs);
-                    }
-                }
-            }
-
-            //if (nextInputs.MoveInput != Vector2.zero)
-            //{
-            //    PlayerStopped = false;
-            //} 
-            //else if (!PlayerStopped)
-            //{
-            //    PlayerStopped = true;
-            //}
-            //else
-            //{
-            //    return;
-            //}
 
             // Apply movement on server side
-            playerMovement.Movement(nextInputs.MoveInput.normalized);
+            playerMovement.MovePlayerWithCollisions(nextInputs.MoveInput.normalized);
 
-            // Send position back to clients for reconciliation
-            UpdatePositionRPC(transform.position, (uint)NetworkManager.ServerTime.Tick);
+            Inputs newPosition = new(transform.position, inputs.IsAttacking);
+
+            // Do interpolation for the host version of the clients
+            // The HostInterpolation creates a visual object that has interpolation and follows the real position
+            interpolator.AddNewPosition((uint)NetworkManager.LocalTime.Tick, newPosition);
+
+            // Send position to the clients 
+            UpdatePositionRPC((uint)NetworkManager.LocalTime.Tick, newPosition);
         }
     }
 
-    // RPC to report inputs to the server
+    // RPC from client to server: reports input messages
     [Rpc(SendTo.Server, Delivery = RpcDelivery.Unreliable)]
-    public void InputReportRPC(MessageBundle[] messages)
+    private void InputReportRPC(MessageBundle[] messages)
     {
+        // Set the size for ServerSideBuffer that the client should aim to keep
         int targetBuffer = 4;
 
-        
+        // For each Input the Client sent add it to the buffer if we havent received it before
         for (int i = 0; i < messages.Length; i++)
         {
             Queue.TryAddMessageToBuffer((uint)NetworkManager.ServerTime.Tick, messages[i]);
         }
+
+        /* Calculate how large the buffer of future messages is
+         * To Calculate take the last tick received (messages[^1].Id) and subtract (the current tick)
+         */
         int actualBuffer = (int)(messages[^1].Id - (uint)NetworkManager.ServerTime.Tick);
+
+        // Send a message to the client with the health of the buffer
         SendBufferStatusClientRPC(actualBuffer, targetBuffer);
     }
 
+    // RPC from server to client: tells client how many ticks ahead/behind it is aka the current buffer health
     [Rpc(SendTo.Owner, Delivery = RpcDelivery.Unreliable)]
     private void SendBufferStatusClientRPC(int actualBuffer, int targetBuffer)
     {
         AdjustTickOffsetBasedOnBuffer(actualBuffer, targetBuffer);
     }
 
-    // RPC to update client-side position, used for reconciliation or direct sync
+    // RPC from server to all clients: updates the position of a player
     [Rpc(SendTo.NotServer, Delivery = RpcDelivery.Unreliable)]
-    public void UpdatePositionRPC(Vector2 NewPosition, uint MessageId)
+    private void UpdatePositionRPC(uint messageId, Inputs newInputs)
     {
         if (IsLocalPlayer)
         {
             // Perform client-side prediction correction
-            clientReconcile.IsPredictionCorrect(NewPosition, MessageId);
+            clientReconcile.IsPredictionCorrect(newInputs, messageId);
             return;
         }
         else
         {
-            // Apply directly to remote clients
-            playerMovement.OnNewPositionRecieved(NewPosition);
+            interpolator.AddNewPosition(messageId, newInputs);
+            return;
         }
     }
 }

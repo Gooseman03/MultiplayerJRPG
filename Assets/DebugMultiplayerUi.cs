@@ -1,4 +1,3 @@
-using Ladder.PlayerMovement1Helpers;
 using Ladder.PlayerMovementHelpers;
 using UnityEngine;
 using UnityEngine.UI;

@@ -11,11 +11,9 @@ GameObject:
   - component: {fileID: 6398170217418850887}
   - component: {fileID: 8412725818582876355}
   - component: {fileID: 7710950263828226558}
+  - component: {fileID: -6806970274026974198}
   - component: {fileID: 7875514272864897525}
   - component: {fileID: 8533944253021305013}
-  - component: {fileID: -6208306139734863822}
-  - component: {fileID: -7335981869460385141}
-  - component: {fileID: -6806970274026974198}
   m_Layer: 6
   m_Name: player
   m_TagString: Player
@@ -118,6 +116,23 @@ MonoBehaviour:
   AutoObjectParentSync: 1
   SyncOwnerTransformWhenParented: 1
   AllowOwnerToParent: 0
+--- !u!114 &-6806970274026974198
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 495610275832350845}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: efeaade153b067d47a0002fd09ccaff0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  playerMovement: {fileID: 7875514272864897525}
+  redundantMessages: 8
+  maxRedundantMessages: 10
+  clientLeadTick: 5
 --- !u!114 &7875514272864897525
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -130,9 +145,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 856569b2a7d25c64aabd527a3e7a6a3e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ShowTopMostFoldoutHeaderGroup: 1
   speed: 5
-  Interpolate: 0
   collisionMask:
     serializedVersion: 2
     m_Bits: 1
@@ -150,50 +163,3 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
---- !u!114 &-6208306139734863822
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 495610275832350845}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bdbcaf406b7da21409e1beb98d6390b1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ShowTopMostFoldoutHeaderGroup: 1
-  InterpolationSpeed: 6
---- !u!114 &-7335981869460385141
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 495610275832350845}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cbe07705db02df147b8f76a72763941e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ShowTopMostFoldoutHeaderGroup: 1
-  lastMessage:
-    Id: 0
---- !u!114 &-6806970274026974198
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 495610275832350845}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: efeaade153b067d47a0002fd09ccaff0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ShowTopMostFoldoutHeaderGroup: 1
-  playerMovement: {fileID: 7875514272864897525}
-  Extrapolate: 0
-  redundantMessages: 8
-  maxRedundantMessages: 10
-  clientLeadTick: 5

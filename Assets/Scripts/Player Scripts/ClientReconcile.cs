@@ -8,13 +8,6 @@ namespace Ladder.PlayerMovementHelpers
     {
         private Dictionary<uint, Vector2> PreviousLocations = new Dictionary<uint, Vector2>(); // Where you were in the past sorted by the tick
         private Dictionary<uint, Inputs> PreviousMessages = new Dictionary<uint, Inputs>(); // What Inputs were sent to the server on the tick
-        private PlayerMovement owner = null; // Reference to the PlayerMovement System for reconciliation 
-
-        // Finds the playerMovement Script
-        private void Awake()
-        {
-            owner = GetComponent<PlayerMovement>();
-        }
 
         /* 
          * Takes in the current Tick and what the Inputs were this tick and stores them for reconciliation with the server
@@ -25,7 +18,7 @@ namespace Ladder.PlayerMovementHelpers
             PreviousLocations.Add(time, new(transform.position.x, transform.position.y));
         }
 
-        public bool DoesPreviousInputExistAt(uint index)
+        public bool CheckForInputAt(uint index)
         {
             if (PreviousMessages.TryGetValue(index, out Inputs message))
             {
@@ -37,7 +30,7 @@ namespace Ladder.PlayerMovementHelpers
          * Supply a Index and how many messages you want 
          * It will return a array of previousInputs starting at the Index back
          */
-        public MessageBundle[] GrabPreviousInputs(uint StartIndex, int count)
+        public MessageBundle[] GrabRedundantMessages(uint StartIndex, int count)
         {
             List<MessageBundle> result = new();
             for (uint i = 0; i < count; i++)
@@ -54,14 +47,14 @@ namespace Ladder.PlayerMovementHelpers
          * Checks whether the predicted position for a given message ID matches the actual position.
          * If there's a mismatch, it triggers a resynchronization.
         */
-        public void IsPredictionCorrect(Vector2 NewPosition, uint messageId)
+        public void IsPredictionCorrect(Inputs newInputs, uint messageId)
         {
             if (PreviousLocations.TryGetValue(messageId, out Vector2 message))
             {
                 DiscardBefore(messageId);
-                if (message != NewPosition)
+                if (message != newInputs.Position)
                 {
-                    Resync(NewPosition, messageId);
+                    Resync(newInputs.Position, messageId);
                 }
             }
         }

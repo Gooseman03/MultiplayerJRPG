@@ -5,14 +5,12 @@ using UnityEngine.Events;
 
 namespace Ladder.Multiplayer.Multiplayer.Syncing
 {
-    public delegate void AtTriggerTimeEvent();
     public class Multiplayer : NetworkBehaviour
     {
-        public event AtTriggerTimeEvent AtTriggerTime;
-
-        [SerializeField] private bool shouldDebugEvents = false;
-        [SerializeField] private bool willSendDebugTime = true;
-        public int TicksToDelay = 5;
+        public UnityEvent AtTriggerTime;
+        // Number of ticks to delay the event after the system starts the timer.
+        public int TicksToDelay = 30;
+        // Property to convert delay from ticks to seconds. It calculates the time delay based on the local tick rate.
         public float SecondsToDelay
         {
             get
@@ -22,67 +20,57 @@ namespace Ladder.Multiplayer.Multiplayer.Syncing
             }
             set
             {
+                // Convert from seconds to ticks.
                 float TicksToDelayInSeconds = value;
-                TicksToDelay = Mathf.RoundToInt( TicksToDelayInSeconds * NetworkManager.LocalTime.TickRate );
+                TicksToDelay = Mathf.RoundToInt(TicksToDelayInSeconds * NetworkManager.LocalTime.TickRate);
             }
         }
 
-        private void OnTriggerTime()
+        // Method to invoke the event when trigger time occurs.
+        public void OnTriggerTime()
         {
-            AtTriggerTime();
-        }
-
-        private void Update()
-        {
-            if (IsServer)
-            {
-                if(willSendDebugTime)
-                {
-                    willSendDebugTime = false;
-                    NotifyClientsOfBeginningTickRpc(NetworkManager.LocalTime.Tick + TicksToDelay);
-                }
-            }
-            if (shouldDebugEvents)
-            {
-                OnTriggerTime();
-            }
+            AtTriggerTime.Invoke();
         }
 
         /// <summary>
-        /// <para>Call this when the requirements for your system are met.</para>
-        /// <para>Make sure to set SecondsToDelay to the duration before the door opens</para>
-        /// <example>
-        /// <para>If you need to open a door when a puzzle is completed. Then call this when the puzzle is completed. It will sync all of the doors opening.</para>
-        /// </example>
+        /// Starts the timer on the server and syncs it with the clients.
+        /// Make sure to set SecondsToDelay to the duration before the event is triggered.
+        /// <para>Example usage: Use this to sync an event (e.g., door opening) across clients after a delay.</para>
         /// </summary>
-        public void StartTimer()
+        public bool StartTimer()
         {
+            int triggerTick = NetworkManager.LocalTime.Tick + TicksToDelay;
             if (!IsServer)
             {
-                throw new System.Exception("Calling a Server-side method on a client");
+                Debug.LogError("Cannot call a Server-side method on a client");
+                return false;
             }
-            int triggerTick = NetworkManager.LocalTime.Tick + TicksToDelay;
-            if (IsServer)
+            else
             {
                 StartCoroutine(WaitForTrigger(triggerTick));
                 NotifyClientsOfBeginningTickRpc(triggerTick);
+                return true;
             }
         }
 
+        // This method is called on the client to prepare for the event when the server tells it when to trigger.
         private void StartWaitingForTickClient(int whenToBeginAsTick)
         {
             int currentTick = NetworkManager.LocalTime.Tick;
             if (currentTick < whenToBeginAsTick)
             {
-                StartCoroutine(WaitForTrigger(whenToBeginAsTick));
                 Debug.Log("Waiting...");
+                StartCoroutine(WaitForTrigger(whenToBeginAsTick));
             }
             else
             {
+                // If the event is overdue, trigger it immediately.
                 Debug.Log("Message was Late... Triggering Now");
+                OnTriggerTime();
             }
         }
 
+        // Coroutine that waits for the specific tick before triggering the event.
         private IEnumerator WaitForTrigger(int triggerTick)
         {
             // To find how long to wait. Find how long till the trigger tick. Then divide by how many ticks there are per second
@@ -91,11 +79,10 @@ namespace Ladder.Multiplayer.Multiplayer.Syncing
             OnTriggerTime();
         }
 
-        [Rpc(target:SendTo.NotServer ,Delivery = RpcDelivery.Reliable)]
-        private void NotifyClientsOfBeginningTickRpc(int triggerAtTick) 
+        [Rpc(target: SendTo.NotServer, Delivery = RpcDelivery.Reliable)]
+        private void NotifyClientsOfBeginningTickRpc(int triggerAtTick)
         {
             StartWaitingForTickClient(triggerAtTick);
         }
     }
 }
-

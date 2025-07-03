@@ -14,6 +14,8 @@ public class PlayerController : NetworkBehaviour
     private ClientReconcile clientReconcile = null; // Handles client-side prediction correction
     private Interpolation interpolator = null; // Smooths other clients' movement on this client
 
+    [SerializeField] private bool isExtrapolating = false;
+
     [Header("Buffer System")]
     [Tooltip("Number of past inputs the client sends to the server.\nDefault is 4.")]
     [SerializeField] private int redundantMessages = 4;
@@ -49,13 +51,15 @@ public class PlayerController : NetworkBehaviour
             else
             {
                 interpolator = gameObject.AddComponent<ClientInterpolation>();
+                ClientInterpolation interpolationClient = interpolator as ClientInterpolation;
+                interpolationClient.EnableExtrapolation = isExtrapolating;
             }
             interpolator.controller = this;
         }
         //DebugMultiplayerUi.Instance.ExtrapolationToggle.onValueChanged.AddListener((value) => { Extrapolate = value; });
         //DebugMultiplayerUi.Instance.InterpolationToggle.onValueChanged.AddListener((value) => { playerMovement.Interpolate = value; });
-        DebugMultiplayerUi.Instance.AheadTicksSlider.onValueChanged.AddListener((value) => { clientLeadTick = (int)value; });
-        DebugMultiplayerUi.Instance.RedundantTicksSlider.onValueChanged.AddListener((value) => { redundantMessages = (int)value; });
+        //DebugMultiplayerUi.Instance.AheadTicksSlider.onValueChanged.AddListener((value) => { clientLeadTick = (int)value; });
+        //DebugMultiplayerUi.Instance.RedundantTicksSlider.onValueChanged.AddListener((value) => { redundantMessages = (int)value; });
     }
     public override void OnNetworkDespawn()
     {

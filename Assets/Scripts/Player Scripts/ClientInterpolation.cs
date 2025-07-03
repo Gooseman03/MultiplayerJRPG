@@ -7,7 +7,7 @@ using Ladder.PlayerMovementHelpers;
 
 public class ClientInterpolation : Interpolation
 {
-    [SerializeField] public bool EnableExtrapolation = true;
+    public bool EnableExtrapolation = true;
     private uint extrapolationAttempts = 0; // How many times Extrapolation has been used since last received position
     private Vector2 TempPosition = Vector2.zero;
     protected override void OnAddNewPosition()
@@ -53,7 +53,6 @@ public class ClientInterpolation : Interpolation
         }
         return true;
     }
-
     protected override bool PreInterpolation()
     {
         if (!EnableExtrapolation) { return true; }

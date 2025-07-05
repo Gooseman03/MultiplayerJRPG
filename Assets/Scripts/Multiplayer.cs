@@ -40,7 +40,7 @@ namespace Ladder.Multiplayer.Multiplayer.Syncing
         public bool StartTimer()
         {
             int triggerTick = NetworkManager.LocalTime.Tick + TicksToDelay;
-            if (!IsServer)
+            if (IsClient)
             {
                 Debug.LogError("Cannot call a Server-side method on a client");
                 return false;

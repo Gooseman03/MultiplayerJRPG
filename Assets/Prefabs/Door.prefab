@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 5900340353385883171}
   - component: {fileID: 6406790062886096631}
-  - component: {fileID: 6355781730133927444}
   - component: {fileID: 3862517100153239844}
   m_Layer: 0
   m_Name: Door
@@ -52,7 +51,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 3950548339
+  GlobalObjectIdHash: 1794840708
   InScenePlacedSourceGlobalObjectIdHash: 1794840708
   DeferredDespawnTick: 0
   Ownership: 1
@@ -65,35 +64,6 @@ MonoBehaviour:
   AutoObjectParentSync: 1
   SyncOwnerTransformWhenParented: 1
   AllowOwnerToParent: 0
---- !u!114 &6355781730133927444
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 63943782140644721}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 85581947aec855d49845b44457fa48c4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ShowTopMostFoldoutHeaderGroup: 1
-  AtTriggerTime:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 3862517100153239844}
-        m_TargetAssemblyTypeName: DoorController, Assembly-CSharp
-        m_MethodName: SwitchDoor
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-  TicksToDelay: 30
 --- !u!114 &3862517100153239844
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -103,10 +73,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 63943782140644721}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a5576f27340e8db4295a8710a69c1d19, type: 3}
+  m_Script: {fileID: 11500000, guid: 7000e02470a5fdc4d9656c6fec1f8d5c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  doorCount: 1
+  doorCount: 2
   doors:
   - door: {fileID: 5779995221936353404}
     doorStart: {fileID: 6724973025847540119}
@@ -114,7 +84,6 @@ MonoBehaviour:
   - door: {fileID: 3615125794631312266}
     doorStart: {fileID: 6763588989065350390}
     doorEnd: {fileID: 1220923244879046060}
-  openTimer: 0
 --- !u!1 &4486027410143032827
 GameObject:
   m_ObjectHideFlags: 0

@@ -36,18 +36,7 @@ public class DoorController : MonoBehaviour
     }
     private bool isMoving;
 
-    [SerializeField] private float openTimer = 0;
-
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Awake()
-    {
-        //if (leftSlat == null || rightSlat == null)
-        //{
-        //    Debug.LogError("Doors Require 2 slats");
-        //    this.enabled = false;
-        //}
-        //doorWidth = leftSlat.transform.localScale.x + rightSlat.transform.localScale.x;
-    }
+    private float openTimer = 0;
 
     public void SwitchDoor()
     {
@@ -98,27 +87,3 @@ public class DoorController : MonoBehaviour
         }
     }
 }
-
-//float newScale = Mathf.Lerp(doorWidth / 2, 0, openTimer);
-//float positionOffset = Mathf.Lerp(0, doorWidth / 4, openTimer);
-//GameObject slat;
-//while (true)
-//{
-//    float newPostition = (float)(doorWidth / 4) + positionOffset;
-//    if (doorSide == DoorSide.left)
-//    {
-//        slat = leftSlat;
-//        newPostition = -newPostition;
-//    }
-//    else
-//    {
-//        slat = rightSlat;
-//    }
-//    slat.transform.localScale = new Vector3(newScale, slat.transform.localScale.y, slat.transform.localScale.z); ;
-//    slat.transform.localPosition = new Vector3(newPostition, 0, 0);
-//    if (doorSide == DoorSide.right)
-//    { 
-//        break; 
-//    }
-//    doorSide = DoorSide.right;
-//}

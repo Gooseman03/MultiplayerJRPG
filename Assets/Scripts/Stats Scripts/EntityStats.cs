@@ -127,6 +127,10 @@ namespace Ladder.EntityStatistics
         }
 
         // Level Methods
+        public virtual void IncreaseLevel(int amount = 1)
+        {
+            Level.Value += amount;
+        }
 
 
         // Damage Methods
@@ -266,7 +270,7 @@ namespace Ladder.EntityStatistics
         }
 
         // Calculates the bonus damage gathered by crit and modifiers.
-        private int CalculateBonusDamage(int baseAttackDamage, int modifier)
+        private int CalculateBonusDamage(int baseAttackDamage, float modifier)
         {
             //bool isCrit = ; Do randomization
             return Math.Max(Mathf.RoundToInt((1f + modifier) * baseAttackDamage), 0);

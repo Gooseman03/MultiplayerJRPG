@@ -1,19 +1,14 @@
-using Ladder.Input;
-using Ladder.PlayerMovementHelpers;
-using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.UIElements;
 
-public class PlayerMovement : MonoBehaviour
+public class PlayerMovement : NetworkBehaviour
 {
     [SerializeField] private float speed;
 
     // Collision Variables
-    private List<RaycastHit2D> raycastHits = new List<RaycastHit2D>(); 
     [SerializeField] private LayerMask collisionMask; // What layers the player can collide with
     [SerializeField] private float skinWidth = 0.1f;  // A Extra Buffer when doing collision checks
-
+    // Methods
     // Moves the player as by the vector input and if there is a collision stop there
     public void MovePlayerWithCollisions(Vector2 movementVector)
     {
@@ -51,6 +46,10 @@ public class PlayerMovement : MonoBehaviour
     private bool IsColliding(Vector2 move)
     {
         RaycastHit2D hit = Physics2D.BoxCast(transform.position, transform.localScale, 0f, move.normalized, move.magnitude + skinWidth, collisionMask);
+        if (hit && hit.transform.TryGetComponent(out PushableObject pushableObject))
+        {
+            pushableObject.OnPush(move);
+        }
         return hit.collider != null;
     }
 
@@ -62,6 +61,8 @@ public class PlayerMovement : MonoBehaviour
         float distanceToHit = hit.distance - skinWidth;
         return Mathf.Max(distanceToHit, 0f);
     }
+
+    // Helper Methods
 
     // Moves the Transform to the vector2 supplied will assume z is 0 
     void MovePlayer(Vector2 vector2)

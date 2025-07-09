@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class HostInterpolation : ClientInterpolation
+public class HostInterpolation : Extrapolation
 {
     private GameObject InterpolatedVersion;
     private SpriteRenderer sprite;

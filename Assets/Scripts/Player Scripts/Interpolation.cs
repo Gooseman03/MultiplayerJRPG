@@ -5,10 +5,10 @@ using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-public abstract class Interpolation : MonoBehaviour
+public class Interpolation : MonoBehaviour
 {
     //protected MessageQueue queue = new MessageQueue(0,new(new Vector2(0, 0), false,true));
-    public PlayerController controller;
+    public Queue<Inputs> QueueReference;
 
     [Tooltip("This will Enable/Disable Interpolation If it is Disabled the transform will be set directly")]
     public bool EnableInterpolation = true;
@@ -33,7 +33,7 @@ public abstract class Interpolation : MonoBehaviour
             return;
         }
 
-        controller.Queue[messageId] = newInputs;
+        QueueReference[messageId] = newInputs;
         newestMessageIndex = messageId;
 
         // Reset interpolation state if its paused and we receive a new message
@@ -50,7 +50,8 @@ public abstract class Interpolation : MonoBehaviour
 
     public void Start()
     {
-        controller.Queue[0] = new Inputs(new Vector2(0, 0), false);
+        QueueReference ??= new Queue<Inputs>(); // If Queue is null make one ??= does that
+        QueueReference[0] = new Inputs(new Vector2(0, 0), false);
         interpolationTarget = gameObject.transform;
         PostStart();
     }
@@ -102,20 +103,29 @@ public abstract class Interpolation : MonoBehaviour
     }
     private void PerformInterpolation()
     {
-        if (controller.Queue[nextPositionIndex].Position - controller.Queue[lastRanPositionIndex].Position == Vector2.zero)
+        if (QueueReference.TryGetValue(nextPositionIndex, out Inputs inputs1) && QueueReference.TryGetValue(lastRanPositionIndex, out Inputs inputs2))
         {
-            // No movement required — wait for server.
+            if (QueueReference[nextPositionIndex].Position - QueueReference[lastRanPositionIndex].Position == Vector2.zero)
+            {
+                // No movement required — wait for server.
+                pauseInterpolation = true;
+                return;
+            }
+            interpolationTarget.position = FindNextMove(lastRanPositionIndex, nextPositionIndex);
+        }
+        else
+        {
+            // Something went wrong a value is missing - wait for server
             pauseInterpolation = true;
             return;
         }
-        interpolationTarget.position = FindNextMove(lastRanPositionIndex, nextPositionIndex);
     }
 
     // Returns the nextposition to move to by using a lerp
     private Vector2 FindNextMove(uint from, uint to)
     {
-        Vector2 start = controller.Queue[from].Position;
-        Vector2 end = controller.Queue[to].Position;
+        Vector2 start = QueueReference[from].Position;
+        Vector2 end = QueueReference[to].Position;
         float t = timer / tickLength;
         return Vector2.Lerp(start, end, t);
     }

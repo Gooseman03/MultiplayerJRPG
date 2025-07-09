@@ -4,8 +4,9 @@ using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UIElements;
 using Ladder.PlayerMovementHelpers;
+using System.Collections;
 
-public class ClientInterpolation : Interpolation
+public class Extrapolation : Interpolation
 {
     public bool EnableExtrapolation = true;
     private uint extrapolationAttempts = 0; // How many times Extrapolation has been used since last received position
@@ -14,11 +15,11 @@ public class ClientInterpolation : Interpolation
     {
         if (extrapolationAttempts != 0)
         {
-            TempPosition = controller.Queue[lastRanPositionIndex].Position;
+            TempPosition = QueueReference[lastRanPositionIndex].Position;
 
-            Inputs inputs = controller.Queue[lastRanPositionIndex];
+            Inputs inputs = QueueReference[lastRanPositionIndex];
             inputs.Position = interpolationTarget.position;
-            controller.Queue[lastRanPositionIndex] = inputs;
+            QueueReference[lastRanPositionIndex] = inputs;
             timer = 0;
             Debug.Log("New Input Received during Extrapolation... Resyncing");
         }
@@ -30,19 +31,19 @@ public class ClientInterpolation : Interpolation
         if (EnableExtrapolation && nextPositionIndex == newestMessageIndex)
         {
             // Check if we have the data to Extrapolate with
-            if (!controller.Queue.ContainsKey(nextPositionIndex - 1))
+            if (!QueueReference.ContainsKey(nextPositionIndex - 1))
             {
                 pauseInterpolation = true;
                 return false;
             }
-            if( TempPosition != Vector2.zero)
+            if(TempPosition != Vector2.zero)
             {
-                Inputs inputs = controller.Queue[lastRanPositionIndex];
+                Inputs inputs = QueueReference[lastRanPositionIndex];
                 inputs.Position = TempPosition;
-                controller.Queue[lastRanPositionIndex] = inputs;
+                QueueReference[lastRanPositionIndex] = inputs;
                 TempPosition = Vector2.zero;
             }
-            Extrapolation();
+            Extrapolate();
             lastRanPositionIndex = nextPositionIndex;
             nextPositionIndex++;
         }
@@ -66,13 +67,13 @@ public class ClientInterpolation : Interpolation
     }
     
     // Extrapolates and adds the value to the positions
-    private void Extrapolation()
+    private void Extrapolate()
     {
         // Extrapolate next position by finding the delta movement and adding it to the current position
-        Vector2 extrapolatedPosition = 2 * controller.Queue[nextPositionIndex].Position - controller.Queue[nextPositionIndex - 1].Position;
+        Vector2 extrapolatedPosition = 2 * QueueReference[nextPositionIndex].Position - QueueReference[nextPositionIndex - 1].Position;
         Debug.Log("Input wasnt on time... Extrapolating");
         // Add the extrapolated input
-        controller.Queue.TryAdd(nextPositionIndex + 1, new Inputs(extrapolatedPosition, controller.Queue[nextPositionIndex].IsAttacking));
+        QueueReference.Add(new StoredMessage<Inputs>() {Id = nextPositionIndex + 1, message = new Inputs(extrapolatedPosition, QueueReference[nextPositionIndex].IsAttacking) });
         extrapolationAttempts++;
     }
 }

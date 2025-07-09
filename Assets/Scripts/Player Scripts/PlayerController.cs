@@ -7,12 +7,13 @@ using UnityEngine;
 public class PlayerController : NetworkBehaviour
 {
     [HideInInspector]
-    public MessageQueue Queue = new MessageQueue(); // Stores input messages for server-side processing
+    public Queue<Inputs> Queue = new Queue<Inputs>(); // Stores input messages for server-side processing
+
     [HideInInspector]
     public PlayerMovement playerMovement = null; // Reference to the movement script
 
     private ClientReconcile clientReconcile = null; // Handles client-side prediction correction
-    private Interpolation interpolator = null; // Smooths other clients' movement on this client
+    private Interpolation interpolator = null; // Smooths other clients movement on this client
 
     [SerializeField] private bool isExtrapolating = false;
 
@@ -47,14 +48,14 @@ public class PlayerController : NetworkBehaviour
             if (IsServer)
             {
                 interpolator = gameObject.AddComponent<HostInterpolation>();
+                Extrapolation interpolationClient = interpolator as HostInterpolation;
+                interpolationClient.EnableExtrapolation = isExtrapolating;
             }
             else
             {
-                interpolator = gameObject.AddComponent<ClientInterpolation>();
-                ClientInterpolation interpolationClient = interpolator as ClientInterpolation;
-                interpolationClient.EnableExtrapolation = isExtrapolating;
+                interpolator = gameObject.AddComponent<Interpolation>();
             }
-            interpolator.controller = this;
+            interpolator.QueueReference = Queue;
         }
         //DebugMultiplayerUi.Instance.ExtrapolationToggle.onValueChanged.AddListener((value) => { Extrapolate = value; });
         //DebugMultiplayerUi.Instance.InterpolationToggle.onValueChanged.AddListener((value) => { playerMovement.Interpolate = value; });
@@ -80,7 +81,7 @@ public class PlayerController : NetworkBehaviour
         if (clientReconcile.CheckForInputAt(tickBeingRan))
         {
             // Get recent redundant messages to send to the server
-            MessageBundle[] messagesToSend = clientReconcile.GrabRedundantMessages(tickBeingRan, redundantMessages);
+            StoredMessage<Inputs>[] messagesToSend = clientReconcile.GrabRedundantMessages(tickBeingRan, redundantMessages);
 
             // Send them to the server (reliable delivery isn't required)
             InputReportRPC(messagesToSend);
@@ -91,7 +92,7 @@ public class PlayerController : NetworkBehaviour
         clientReconcile.RecordGameState(tickBeingRan, bundle);
 
         // Get the full input history, including the current input (which was just recorded)
-        MessageBundle[] messages = clientReconcile.GrabRedundantMessages(tickBeingRan, redundantMessages + 1);
+        StoredMessage<Inputs> [] messages = clientReconcile.GrabRedundantMessages(tickBeingRan, redundantMessages + 1);
 
         // Send the inputs to the server
         InputReportRPC(messages);
@@ -176,10 +177,10 @@ public class PlayerController : NetworkBehaviour
             Inputs nextInputs = new();
             // Try to get input for the current tick from the message queue
             // If its found set that as the next inputs to run and delete all inputs before then
-            if (Queue.TryGetInput((uint)NetworkManager.LocalTime.Tick, out Inputs inputs))
+            if (Queue.TryGetValue((uint)NetworkManager.LocalTime.Tick, out Inputs inputs))
             {
                 nextInputs = inputs;
-                Queue.RemoveMessageFromBuffer((uint)NetworkManager.LocalTime.Tick - 30);
+                Queue.Remove((uint)NetworkManager.LocalTime.Tick - 30);
             }
 
             // Apply movement on server side
@@ -198,7 +199,7 @@ public class PlayerController : NetworkBehaviour
 
     // RPC from client to server: reports input messages
     [Rpc(SendTo.Server, Delivery = RpcDelivery.Unreliable)]
-    private void InputReportRPC(MessageBundle[] messages)
+    private void InputReportRPC(StoredMessage<Inputs>[] messages)
     {
         // Set the size for ServerSideBuffer that the client should aim to keep
         int targetBuffer = 4;
@@ -206,12 +207,10 @@ public class PlayerController : NetworkBehaviour
         // For each Input the Client sent add it to the buffer if we havent received it before
         for (int i = 0; i < messages.Length; i++)
         {
-            Queue.TryAddMessageToBuffer((uint)NetworkManager.ServerTime.Tick, messages[i]);
+            Queue.TryAddValue((uint)NetworkManager.ServerTime.Tick, messages[i]);
         }
 
-        /* Calculate how large the buffer of future messages is
-         * To Calculate take the last tick received (messages[^1].Id) and subtract (the current tick)
-         */
+        // Calculate how large the buffer of future messages is
         int actualBuffer = (int)(messages[^1].Id - (uint)NetworkManager.ServerTime.Tick);
 
         // Send a message to the client with the health of the buffer

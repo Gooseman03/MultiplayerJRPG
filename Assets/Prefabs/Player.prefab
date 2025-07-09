@@ -148,11 +148,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 856569b2a7d25c64aabd527a3e7a6a3e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
   speed: 5
   collisionMask:
     serializedVersion: 2
-    m_Bits: 1
-  skinWidth: 0.05
+    m_Bits: 129
+  skinWidth: 0.1
 --- !u!114 &8533944253021305013
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -6,21 +6,19 @@ namespace Ladder.PlayerMovementHelpers
 {
     public class ClientReconcile : NetworkBehaviour
     {
-        private Dictionary<uint, Vector2> PreviousLocations = new Dictionary<uint, Vector2>(); // Where you were in the past sorted by the tick
-        private Dictionary<uint, Inputs> PreviousMessages = new Dictionary<uint, Inputs>(); // What Inputs were sent to the server on the tick
+        private Dictionary<uint, Vector2> previousLocations = new Dictionary<uint, Vector2>(); // Where you were in the past sorted by the tick
+        private Dictionary<uint, Inputs> previousMessages = new Dictionary<uint, Inputs>(); // What Inputs were sent to the server on the tick
 
-        /* 
-         * Takes in the current Tick and what the Inputs were this tick and stores them for reconciliation with the server
-         */
+        // Takes in the current Tick and what the Inputs were this tick and stores them for reconciliation with the server
         public void RecordGameState(uint time, Inputs message)
         {
-            PreviousMessages.Add(time, message);
-            PreviousLocations.Add(time, new(transform.position.x, transform.position.y));
+            previousMessages.Add(time, message);
+            previousLocations.Add(time, new(transform.position.x, transform.position.y));
         }
 
         public bool CheckForInputAt(uint index)
         {
-            if (PreviousMessages.TryGetValue(index, out Inputs message))
+            if (previousMessages.TryGetValue(index, out Inputs message))
             {
                 return true;
             }
@@ -30,12 +28,12 @@ namespace Ladder.PlayerMovementHelpers
          * Supply a Index and how many messages you want 
          * It will return a array of previousInputs starting at the Index back
          */
-        public MessageBundle[] GrabRedundantMessages(uint StartIndex, int count)
+        public StoredMessage<Inputs>[] GrabRedundantMessages(uint StartIndex, int count)
         {
-            List<MessageBundle> result = new();
+            List<StoredMessage<Inputs>> result = new();
             for (uint i = 0; i < count; i++)
             {
-                if (PreviousMessages.TryGetValue(StartIndex - i, out Inputs message))
+                if (previousMessages.TryGetValue(StartIndex - i, out Inputs message))
                 {
                     result.Add(new(StartIndex - i, message));
                 }
@@ -49,7 +47,7 @@ namespace Ladder.PlayerMovementHelpers
         */
         public void IsPredictionCorrect(Inputs newInputs, uint messageId)
         {
-            if (PreviousLocations.TryGetValue(messageId, out Vector2 message))
+            if (previousLocations.TryGetValue(messageId, out Vector2 message))
             {
                 DiscardBefore(messageId);
                 if (message != newInputs.Position)
@@ -66,7 +64,7 @@ namespace Ladder.PlayerMovementHelpers
         public void DiscardBefore(uint messageId)
         {
             List<uint> Remove = new List<uint>();
-            foreach (uint Id in PreviousLocations.Keys)
+            foreach (uint Id in previousLocations.Keys)
             {
                 if (Id < messageId)
                 {
@@ -75,8 +73,8 @@ namespace Ladder.PlayerMovementHelpers
             }
             foreach (uint Id in Remove)
             {
-                PreviousLocations.Remove(Id);
-                PreviousMessages.Remove(Id);
+                previousLocations.Remove(Id);
+                previousMessages.Remove(Id);
             }
         }
 
@@ -90,16 +88,16 @@ namespace Ladder.PlayerMovementHelpers
         public void ResyncPosition(Vector2 NewPosition, uint MessageId)
         {
             // Calculate the offset between the predicted and actual position
-            Vector2 Offset = PreviousLocations[MessageId] - NewPosition;
+            Vector2 Offset = previousLocations[MessageId] - NewPosition;
 
             // Log that a desync occurred and how it will be corrected
             Debug.Log("I Have Desynced at MessageID " + MessageId + "... Correcting Movement by " + Offset, this.gameObject);
 
             // Adjust all stored predicted positions to realign with the actual server-corrected position
-            List<uint> keys = new List<uint>(PreviousLocations.Keys);
+            List<uint> keys = new List<uint>(previousLocations.Keys);
             foreach (uint key in keys)
             {
-                PreviousLocations[key] -= Offset;
+                previousLocations[key] -= Offset;
             }
 
             // Apply the offset correction to the actual player GameObject's transform

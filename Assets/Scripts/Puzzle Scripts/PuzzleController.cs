@@ -7,14 +7,14 @@ using UnityEngine.InputSystem;
 
 public class PuzzleController : NetworkBehaviour
 {
-    [SerializeField] private List<PuzzleComponent> placeableButtons = new List<PuzzleComponent>();
+    [SerializeField] private List<PuzzleComponent> RequiredObjects = new List<PuzzleComponent>();
     [SerializeField] private Multiplayer multiplayer;
     [SerializeField] private bool IsPuzzleComplete = false;
     [SerializeField] private Dictionary<PuzzleComponent, bool> puzzleChecks = new();
 
     private void Awake()
     {
-        foreach (PlaceableButton button in placeableButtons)
+        foreach (PlaceableButton button in RequiredObjects)
         {
             puzzleChecks.Add(button,false);
             // If the Button is pressed set its value in the puzzle dictionary to true and see if all values are true if they are complete the puzzle

@@ -6,18 +6,23 @@ using UnityEngine.Events;
 public class PlaceableButton : PuzzleComponent
 {
     private bool isLocked;
+    [SerializeField] private bool isToggle;
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (isLocked)
         {
             return;
         }
+        if (isToggle)
+        {
+            isLocked = true;
+        }
         OnActivation?.Invoke(this);
         GetComponentInChildren<SpriteRenderer>().color = Color.green;
     }
     private void OnTriggerExit2D(Collider2D collision)
     {
-        if (isLocked)
+        if (isLocked || isToggle)
         {
             return;
         }

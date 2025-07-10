@@ -3,6 +3,6 @@ using UnityEngine.Events;
 
 public class PuzzleComponent : MonoBehaviour
 {
-    public UnityEvent<PuzzleComponent> OnActivation;
-    public UnityEvent<PuzzleComponent> OnDeactivation;
+    [HideInInspector] public UnityEvent<PuzzleComponent> OnActivation;
+    [HideInInspector] public UnityEvent<PuzzleComponent> OnDeactivation;
 }

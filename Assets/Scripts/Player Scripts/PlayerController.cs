@@ -12,8 +12,8 @@ public class PlayerController : NetworkBehaviour
     [HideInInspector]
     public PlayerMovement playerMovement = null; // Reference to the movement script
 
-    private ClientReconcile clientReconcile = null; // Handles client-side prediction correction
-    private Interpolation interpolator = null; // Smooths other clients movement on this client
+    private ClientReconcile clientReconcile; // Handles client-side prediction correction
+    private Interpolation interpolator; // Smooths other clients movement on this client
 
     [SerializeField] private bool isExtrapolating = false;
 
@@ -48,14 +48,13 @@ public class PlayerController : NetworkBehaviour
             if (IsServer)
             {
                 interpolator = gameObject.AddComponent<HostInterpolation>();
-                Extrapolation interpolationClient = interpolator as HostInterpolation;
-                interpolationClient.EnableExtrapolation = isExtrapolating;
+                ((HostInterpolation)interpolator).EnableExtrapolation = isExtrapolating;
             }
             else
             {
                 interpolator = gameObject.AddComponent<Interpolation>();
             }
-            interpolator.QueueReference = Queue;
+            //interpolator.Queue = Queue;
         }
         //DebugMultiplayerUi.Instance.ExtrapolationToggle.onValueChanged.AddListener((value) => { Extrapolate = value; });
         //DebugMultiplayerUi.Instance.InterpolationToggle.onValueChanged.AddListener((value) => { playerMovement.Interpolate = value; });
@@ -190,7 +189,7 @@ public class PlayerController : NetworkBehaviour
 
             // Do interpolation for the host version of the clients
             // The HostInterpolation creates a visual object that has interpolation and follows the real position
-            interpolator.AddNewPosition((uint)NetworkManager.LocalTime.Tick, newPosition);
+            interpolator.AddNewPosition((uint)NetworkManager.LocalTime.Tick, newPosition.Position);
 
             // Send position to the clients 
             UpdatePositionRPC((uint)NetworkManager.LocalTime.Tick, newPosition);
@@ -236,7 +235,7 @@ public class PlayerController : NetworkBehaviour
         }
         else
         {
-            interpolator.AddNewPosition(messageId, newInputs);
+            interpolator.AddNewPosition(messageId, newInputs.Position);
             return;
         }
     }

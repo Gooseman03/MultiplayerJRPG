@@ -39,14 +39,14 @@ public class GenericClientReconcile<T> where T : struct, INetworkSerializable
 
     // Checks whether the predicted position for a given message ID matches the actual position.
     // If there's a mismatch, it triggers a resynchronization.
-    public void IsPredictionCorrect(T newMessage, uint messageId)
+    public void IsPredictionCorrect(T messageFromServer, uint messageId)
     {
-        if (queue.TryGetValue(messageId, out T message))
+        if (queue.TryGetValue(messageId, out T storedPosition))
         {
             //DiscardBefore(messageId);
-            if (Creator.CheckForDesync(message, newMessage))
+            if (Creator.CheckForDesync(storedPosition, messageFromServer))
             {
-                T offset = Creator.Resync(messageId, message);
+                T offset = Creator.Resync(messageId, storedPosition);
                 // Adjust all stored predicted positions to realign with the actual server-corrected position
                 List<uint> keys = new(queue.Keys);
                 foreach (uint key in keys)
@@ -57,7 +57,7 @@ public class GenericClientReconcile<T> where T : struct, INetworkSerializable
         }
         else
         {
-            Creator.OnMessageNotFound(messageId, newMessage);
+            Creator.OnMessageNotStored(messageId, messageFromServer);
         }
     }
     // This will discard all stored inputs and locations from the index Suppied Back

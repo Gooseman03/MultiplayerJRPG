@@ -1,5 +1,6 @@
 using Ladder.PlayerMovementHelpers;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.IO.LowLevel.Unsafe;
 using Unity.Netcode;
 using UnityEngine;
@@ -7,8 +8,7 @@ using UnityEngine.UIElements;
 
 public class Interpolation : MonoBehaviour
 {
-    //protected MessageQueue queue = new MessageQueue(0,new(new Vector2(0, 0), false,true));
-    public Queue<Inputs> QueueReference;
+    public Dictionary<uint,Vector2> Queue = new Dictionary<uint, Vector2>();
 
     [Tooltip("This will Enable/Disable Interpolation If it is Disabled the transform will be set directly")]
     public bool EnableInterpolation = true;
@@ -25,15 +25,15 @@ public class Interpolation : MonoBehaviour
     protected float timer = 0; // Lerp Timer
 
     // Add a new Position that was sent from the server
-    public void AddNewPosition(uint messageId, Inputs newInputs)
+    public void AddNewPosition(uint messageId, Vector2 vector)
     {
         if (!EnableInterpolation)
         {
-            transform.position = newInputs.Position;
+            transform.position = vector;
             return;
         }
 
-        QueueReference[messageId] = newInputs;
+        Queue[messageId] = vector;
         newestMessageIndex = messageId;
 
         // Reset interpolation state if its paused and we receive a new message
@@ -45,18 +45,18 @@ public class Interpolation : MonoBehaviour
         }
         OnAddNewPosition();
     }
-
-    protected virtual void OnAddNewPosition() { }
-
+    public void ForcePosition(Vector2 vector2)
+    {
+        pauseInterpolation = true;
+        interpolationTarget.position = vector2;
+    }
     public void Start()
     {
-        QueueReference ??= new Queue<Inputs>(); // If Queue is null make one ??= does that
-        QueueReference[0] = new Inputs(new Vector2(0, 0), false);
+        //Queue ??= new Dictionary<uint, Vector2>(); // If Queue is null make one ??= does that
+        Queue.Add(0, new Vector2(0, 0));
         interpolationTarget = gameObject.transform;
         PostStart();
     }
-
-    protected virtual void PostStart() { }
     public void Update()
     {
         if (!EnableInterpolation) { return; }
@@ -78,12 +78,29 @@ public class Interpolation : MonoBehaviour
         }
         PerformInterpolation();
     }
-    /// <summary>
-    /// <para>Called by the base class before interpolation occurs.</para>
-    /// <para>Return <c>false</c> to interrupt interpolation for this frame.</para>
-    /// </summary>
-    protected virtual bool PreInterpolation() => true;
+    private void PerformInterpolation()
+    {
+        if (Queue.ContainsKey(nextPositionIndex) && Queue.ContainsKey(lastRanPositionIndex))
+        {
+            if (Queue[nextPositionIndex] - Queue[lastRanPositionIndex] == Vector2.zero)
+            {
+                // No movement required — wait for server.
+                pauseInterpolation = true;
+                return;
+            }
+            interpolationTarget.position = FindNextMove(lastRanPositionIndex, nextPositionIndex);
+        }
+        else
+        {
+            Debug.LogError("A value was missing during interpolation... Pausing Interpolation");
+            // Something went wrong a value is missing - wait for server
+            pauseInterpolation = true;
+            return;
+        }
+    }
 
+
+    protected virtual void PostStart() { }
     /// <summary>
     /// <para>Called when the interpolation timer resets.</para>
     /// <para>Base implementation updates the position indices.</para>
@@ -101,31 +118,17 @@ public class Interpolation : MonoBehaviour
         nextPositionIndex = newestMessageIndex;
         return true;
     }
-    private void PerformInterpolation()
-    {
-        if (QueueReference.TryGetValue(nextPositionIndex, out Inputs inputs1) && QueueReference.TryGetValue(lastRanPositionIndex, out Inputs inputs2))
-        {
-            if (QueueReference[nextPositionIndex].Position - QueueReference[lastRanPositionIndex].Position == Vector2.zero)
-            {
-                // No movement required — wait for server.
-                pauseInterpolation = true;
-                return;
-            }
-            interpolationTarget.position = FindNextMove(lastRanPositionIndex, nextPositionIndex);
-        }
-        else
-        {
-            // Something went wrong a value is missing - wait for server
-            pauseInterpolation = true;
-            return;
-        }
-    }
-
+    protected virtual void OnAddNewPosition() { }
+    /// <summary>
+    /// <para>Called by the base class before interpolation occurs.</para>
+    /// <para>Return <c>false</c> to interrupt interpolation for this frame.</para>
+    /// </summary>
+    protected virtual bool PreInterpolation() => true;
     // Returns the nextposition to move to by using a lerp
     private Vector2 FindNextMove(uint from, uint to)
     {
-        Vector2 start = QueueReference[from].Position;
-        Vector2 end = QueueReference[to].Position;
+        Vector2 start = Queue[from];
+        Vector2 end = Queue[to];
         float t = timer / tickLength;
         return Vector2.Lerp(start, end, t);
     }

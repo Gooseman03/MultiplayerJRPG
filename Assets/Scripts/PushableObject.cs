@@ -46,8 +46,6 @@ public class PushableObject : NetworkBehaviour , IQueueUser<NetworkedVector2>
         {
             LastTickPushedAt = tickBeingRan;
             reconcile.RecordGameState(tickBeingRan, (Vector2)transform.position);
-            //Keys = reconcile.queue.Keys.ToList();
-            //Values = reconcile.queue.Values.ToList();
         }
         Vector2 desiredMove = angle * maxPushSpeed;
         if (desiredMove.x != 0)
@@ -122,7 +120,7 @@ public class PushableObject : NetworkBehaviour , IQueueUser<NetworkedVector2>
         return Offset;
     }
 
-    public void OnMessageNotFound(uint messageId, NetworkedVector2 message)
+    public void OnMessageNotStored(uint messageId, NetworkedVector2 message)
     {
         if (LastTickPushedAt < messageId)
         {

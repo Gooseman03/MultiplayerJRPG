@@ -32,5 +32,7 @@ public struct NetworkedVector2 : INetworkSerializable
 
     public static NetworkedVector2 operator +(NetworkedVector2 value1, NetworkedVector2 value2) => value1.Value + value2.Value;
     public static NetworkedVector2 operator -(NetworkedVector2 value1, NetworkedVector2 value2) => value1.Value - value2.Value;
+    public static NetworkedVector2 operator *(NetworkedVector2 value1, int value2) => value1.Value * value2;
+    public static NetworkedVector2 operator *(int value1, NetworkedVector2 value2) => value1 * value2.Value;
 }
 

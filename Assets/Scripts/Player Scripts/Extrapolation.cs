@@ -15,11 +15,11 @@ public class Extrapolation : Interpolation
     {
         if (extrapolationAttempts != 0)
         {
-            TempPosition = QueueReference[lastRanPositionIndex].Position;
-
-            Inputs inputs = QueueReference[lastRanPositionIndex];
-            inputs.Position = interpolationTarget.position;
-            QueueReference[lastRanPositionIndex] = inputs;
+            TempPosition = Queue[lastRanPositionIndex];
+        
+            NetworkedVector2 vector = Queue[lastRanPositionIndex];
+            vector = interpolationTarget.position;
+            Queue[lastRanPositionIndex] = vector;
             timer = 0;
             Debug.Log("New Input Received during Extrapolation... Resyncing");
         }
@@ -27,20 +27,20 @@ public class Extrapolation : Interpolation
     }
     protected override bool OnInterpolationReset()
     {
-        // If we are at the end of messages sent by the server add 1 to the nextposition and try to extrapolate
+        //If we are at the end of messages sent by the server add 1 to the nextposition and try to extrapolate
         if (EnableExtrapolation && nextPositionIndex == newestMessageIndex)
         {
             // Check if we have the data to Extrapolate with
-            if (!QueueReference.ContainsKey(nextPositionIndex - 1))
+            if (!Queue.ContainsKey(nextPositionIndex - 1))
             {
                 pauseInterpolation = true;
                 return false;
             }
             if(TempPosition != Vector2.zero)
             {
-                Inputs inputs = QueueReference[lastRanPositionIndex];
-                inputs.Position = TempPosition;
-                QueueReference[lastRanPositionIndex] = inputs;
+                NetworkedVector2 vector = Queue[lastRanPositionIndex];
+                vector = TempPosition;
+                Queue[lastRanPositionIndex] = vector;
                 TempPosition = Vector2.zero;
             }
             Extrapolate();
@@ -70,10 +70,10 @@ public class Extrapolation : Interpolation
     private void Extrapolate()
     {
         // Extrapolate next position by finding the delta movement and adding it to the current position
-        Vector2 extrapolatedPosition = 2 * QueueReference[nextPositionIndex].Position - QueueReference[nextPositionIndex - 1].Position;
+        Vector2 extrapolatedPosition = (2 * Queue[nextPositionIndex]) - Queue[nextPositionIndex - 1];
         Debug.Log("Input wasnt on time... Extrapolating");
         // Add the extrapolated input
-        QueueReference.Add(new StoredMessage<Inputs>() {Id = nextPositionIndex + 1, message = new Inputs(extrapolatedPosition, QueueReference[nextPositionIndex].IsAttacking) });
+        Queue.Add(nextPositionIndex + 1, extrapolatedPosition);
         extrapolationAttempts++;
     }
 }

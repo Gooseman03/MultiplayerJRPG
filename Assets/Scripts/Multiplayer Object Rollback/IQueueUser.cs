@@ -1,3 +1,5 @@
+using Unity.Netcode;
+
 public interface IQueueUser<T> where T : struct
 {
     public abstract bool CheckForDesync(T message, T newMessage);

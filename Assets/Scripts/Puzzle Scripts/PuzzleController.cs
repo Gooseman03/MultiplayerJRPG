@@ -1,49 +1,102 @@
 using Ladder.Multiplayer.Multiplayer.Syncing;
+using System;
 using System.Collections.Generic;
-using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.InputSystem;
+using UnityEngine.Events;
 
+/// <summary>
+/// Defines the <see cref="PuzzleController" />
+/// </summary>
 public class PuzzleController : NetworkBehaviour
 {
+    /// <summary>
+    /// Defines the RequiredObjects For the Puzzle to be completed
+    /// </summary>
     [SerializeField] private List<PuzzleComponent> RequiredObjects = new List<PuzzleComponent>();
+
+    /// <summary>
+    /// Defines the multiplayer Timer
+    /// </summary>
     [SerializeField] private Multiplayer multiplayer;
+
+    /// <summary>
+    /// Defines if the Puzzle Is Complete
+    /// </summary>
     [SerializeField] private bool IsPuzzleComplete = false;
+
+    /// <summary>
+    /// Defines the puzzleChecks A dictionary and just is the requiredObject and a bool
+    /// </summary>
     [SerializeField] private Dictionary<PuzzleComponent, bool> puzzleChecks = new();
 
-    private void Awake()
+    public override void OnNetworkSpawn()
     {
-        foreach (PlaceableButton button in RequiredObjects)
+        foreach (PuzzleComponent section in RequiredObjects)
         {
-            puzzleChecks.Add(button,false);
-            // If the Button is pressed set its value in the puzzle dictionary to true and see if all values are true if they are complete the puzzle
-            button.OnActivation.AddListener((PuzzleComponent invoker) => 
+            puzzleChecks.Add(section, false);
+
+            // If the Button is pressed set its value in the puzzle dictionary to true
+            section.OnActivation.AddListener((PuzzleComponent invoker) =>
             {
                 puzzleChecks[invoker] = true;
-                foreach (bool value in puzzleChecks.Values)
-                {
-                    if (value == false)
-                    {
-                        return;
-                    }
-                }
-                OnPuzzleCompleted();
+                CheckPuzzleState();
             });
+
             // If the button is released Set its value in the dictionary to false
-            button.OnDeactivation.AddListener((PuzzleComponent invoker) =>
+            section.OnDeactivation.AddListener((PuzzleComponent invoker) =>
             {
-                puzzleChecks[invoker] = false; 
+                puzzleChecks[invoker] = false;
+                CheckPuzzleState();
             });
         }
     }
-    public void OnPuzzleCompleted()
+
+    /// <summary>
+    /// The CheckPuzzleState checks to see if the <see cref="OnPuzzleCompleted" /> or the <see cref="OnPuzzleUncompleted" /> should be triggered
+    /// </summary>
+    private void CheckPuzzleState()
     {
-        if (IsClient || IsPuzzleComplete)
+        if (!IsServer)
         {
             return;
         }
+        foreach (bool value in puzzleChecks.Values)
+        {
+            // If any of the Puzzle Parts arent done then see if that just happened and call OnPuzzleUncompleted() 
+            if (value == false)
+            {
+                if (IsPuzzleComplete)
+                {
+                    OnPuzzleUncompleted();
+                }
+                return;
+            }
+        }
+        // If they were all complete, and this is the first time then call OnPuzzleCompleted()
+        if (!IsPuzzleComplete)
+        {
+            OnPuzzleCompleted();
+        }
+    }
+
+    /// <summary>
+    /// The OnPuzzleCompleted
+    /// </summary>
+    public void OnPuzzleCompleted()
+    {
         IsPuzzleComplete = true;
+        multiplayer.TicksToDelay = 30;
+        multiplayer.StartTimer();
+    }
+
+    /// <summary>
+    /// The OnPuzzleUncompleted
+    /// </summary>
+    public void OnPuzzleUncompleted()
+    {
+        IsPuzzleComplete = false;
+        multiplayer.TicksToDelay = 3;
         multiplayer.StartTimer();
     }
 }

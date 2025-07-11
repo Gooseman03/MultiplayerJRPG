@@ -55,7 +55,6 @@ public class GenericClientReconcile<T> where T : struct, INetworkSerializable
                     if (key >= messageId)
                         Creator.ApplyOffset(key, offset);
                 }
-
             }
         }
         else

@@ -40,7 +40,7 @@ namespace Ladder.Multiplayer.Multiplayer.Syncing
         public bool StartTimer()
         {
             int triggerTick = NetworkManager.LocalTime.Tick + TicksToDelay;
-            if (IsClient)
+            if (!IsServer)
             {
                 Debug.LogError("Cannot call a Server-side method on a client");
                 return false;
@@ -59,13 +59,11 @@ namespace Ladder.Multiplayer.Multiplayer.Syncing
             int currentTick = NetworkManager.LocalTime.Tick;
             if (currentTick < whenToBeginAsTick)
             {
-                Debug.Log("Waiting...");
                 StartCoroutine(WaitForTrigger(whenToBeginAsTick));
             }
             else
             {
                 // If the event is overdue, trigger it immediately.
-                Debug.Log("Message was Late... Triggering Now");
                 OnTriggerTime();
             }
         }
@@ -79,7 +77,7 @@ namespace Ladder.Multiplayer.Multiplayer.Syncing
             OnTriggerTime();
         }
 
-        [Rpc(target: SendTo.NotServer, Delivery = RpcDelivery.Reliable)]
+        [Rpc(SendTo.NotServer, Delivery = RpcDelivery.Reliable)]
         private void NotifyClientsOfBeginningTickRpc(int triggerAtTick)
         {
             StartWaitingForTickClient(triggerAtTick);

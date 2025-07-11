@@ -3,9 +3,9 @@ using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
 
-public class GenericClientReconcile<T> where T : struct, INetworkSerializable
+public class GenericReconcile<T> where T : struct, INetworkSerializable
 {
-    public IQueueUser<T> Creator;
+    public IUseReconcile<T> Creator;
     public readonly Queue<T> queue = new Queue<T>(); // Where you were in the past sorted by the tick
     // Takes in the current Tick and what the Inputs were this tick and stores them for reconciliation with the server
     public void RecordGameState(uint time, T message)

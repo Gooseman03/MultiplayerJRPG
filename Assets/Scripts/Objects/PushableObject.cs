@@ -3,12 +3,12 @@ using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
 
-public class PushableObject : NetworkBehaviour , IQueueUser<NetworkedVector2>
+public class PushableObject : NetworkBehaviour , IUseReconcile<NetworkedVector2>
 {
     [SerializeField] private LayerMask collisionMask; // What layers the player can collide with
     [SerializeField] private float skinWidth = 0.1f;  // A Extra Buffer when doing collision checks
 
-    private GenericClientReconcile<NetworkedVector2> reconcile;
+    private GenericReconcile<NetworkedVector2> reconcile;
 
     private int clientLeadTick = 5;
     uint LastTickPushedAt = 0;

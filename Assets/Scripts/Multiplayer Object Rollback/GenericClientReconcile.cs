@@ -46,13 +46,16 @@ public class GenericClientReconcile<T> where T : struct, INetworkSerializable
             //DiscardBefore(messageId);
             if (Creator.CheckForDesync(storedPosition, messageFromServer))
             {
-                T offset = Creator.Resync(messageId, storedPosition);
+                T offset = Creator.Resync(storedPosition, messageFromServer);
+                Debug.Log("A Object Desynced at MessageID " + messageId + "... Correcting by " + offset);
                 // Adjust all stored predicted positions to realign with the actual server-corrected position
                 List<uint> keys = new(queue.Keys);
                 foreach (uint key in keys)
                 {
-                    Creator.ApplyOffset(key, offset);
+                    if (key >= messageId)
+                        Creator.ApplyOffset(key, offset);
                 }
+
             }
         }
         else

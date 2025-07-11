@@ -7,18 +7,26 @@ public class PlaceableButton : PuzzleComponent
 {
     private bool isLocked;
     [SerializeField] private bool isToggle;
+    private int CountObjectsColliding = 0;
     private void OnTriggerEnter2D(Collider2D collision)
-    {
+    { 
         if (isLocked)
         {
             return;
         }
-        if (isToggle)
+        if (collision.GetComponent<PlayerController>() || collision.GetComponent<PushableObject>())
         {
-            isLocked = true;
+            CountObjectsColliding++;
+            if (isToggle)
+            {
+                isLocked = true;
+            }
+            if (CountObjectsColliding > 0)
+            {
+                OnActivation?.Invoke(this);
+                GetComponentInChildren<SpriteRenderer>().color = Color.green;
+            }
         }
-        OnActivation?.Invoke(this);
-        GetComponentInChildren<SpriteRenderer>().color = Color.green;
     }
     private void OnTriggerExit2D(Collider2D collision)
     {
@@ -26,8 +34,15 @@ public class PlaceableButton : PuzzleComponent
         {
             return;
         }
-        OnDeactivation?.Invoke(this);
-        GetComponentInChildren<SpriteRenderer>().color = Color.red;
+        if (collision.GetComponent<PlayerController>() || collision.GetComponent<PushableObject>())
+        {
+            CountObjectsColliding--;
+            if (CountObjectsColliding == 0)
+            {
+                OnDeactivation?.Invoke(this);
+                GetComponentInChildren<SpriteRenderer>().color = Color.red;
+            }
+        }
     }
     public void DebugLockAsPressed()
     {

@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class PushableObject : NetworkBehaviour , IQueueUser<NetworkedVector2>
 {
+    //private Interpolation interpolator;
     private GenericClientReconcile<NetworkedVector2> reconcile;
     //public List<uint> Keys;
     //public List<NetworkedVector2> Values;
@@ -40,7 +41,6 @@ public class PushableObject : NetworkBehaviour , IQueueUser<NetworkedVector2>
     }
     public void OnPush(Vector3 angle)
     {
-        // This must be ran pre move
         uint tickBeingRan = (uint)NetworkManager.LocalTime.Tick + (uint)clientLeadTick;
         if (IsClient)
         {
@@ -78,12 +78,21 @@ public class PushableObject : NetworkBehaviour , IQueueUser<NetworkedVector2>
     public override void OnNetworkSpawn()
     {
         NetworkManager.NetworkTickSystem.Tick += OnTick;
+        //if (IsClient)
+        //{
+        //    interpolator = gameObject.AddComponent<HostInterpolation>();
+        //    ((HostInterpolation)interpolator).EnableExtrapolation = false;
+        //}
     }
     private void OnTick()
     {
+        //if (IsClient && !reconcile.queue.ContainsKey((uint)NetworkManager.LocalTime.Tick))
+        //{
+        //    reconcile.RecordGameState((uint)NetworkManager.LocalTime.Tick, (Vector2)transform.position);
+        //}
         if (IsServer)
         {
-            UpdatePositionRPC((uint)NetworkManager.ServerTime.Tick, transform.position);
+            UpdatePositionRPC((uint)NetworkManager.LocalTime.Tick , transform.position);
             //Keys = reconcile.queue.Keys.ToList();
             //Values = reconcile.queue.Values;
             //if (reconcile.queue.TryGetValue((uint)NetworkManager.LocalTime.Tick, out NetworkedVector2 vectors))
@@ -104,21 +113,16 @@ public class PushableObject : NetworkBehaviour , IQueueUser<NetworkedVector2>
 
     public bool CheckForDesync(NetworkedVector2 message1, NetworkedVector2 message2)
     {
-        NetworkedVector2 difference = message1 - message2;
-        if (Mathf.Abs(difference.x) > 0.1f || Mathf.Abs(difference.y) > 0.1f)
-        {
-            return true;
-        }
-        return false;
+        return Vector2.Distance(message1, message2) > 0.1f;
     }
 
-    public NetworkedVector2 Resync(uint messageId, NetworkedVector2 message)
+    public NetworkedVector2 Resync(NetworkedVector2 predicted, NetworkedVector2 server)
     {
-        NetworkedVector2 Offset = reconcile.queue[messageId] - message;
-        Debug.Log("A Object Desynced at MessageID " + messageId + "... Correcting by " + Offset);
-        transform.position -= (Vector3)Offset.Value;
-        return Offset;
+        NetworkedVector2 offset = server - predicted;
+        transform.position += (Vector3)offset.Value;
+        return offset;
     }
+
 
     public void OnMessageNotStored(uint messageId, NetworkedVector2 message)
     {
@@ -126,7 +130,6 @@ public class PushableObject : NetworkBehaviour , IQueueUser<NetworkedVector2>
         {
             transform.position = message;
         }
-        //Debug.Log("Someone else moved me on " + messageId + "... Correcting");
     }
 
     // Helper Methods
@@ -141,8 +144,12 @@ public class PushableObject : NetworkBehaviour , IQueueUser<NetworkedVector2>
         transform.position = NewPosition;
     }
 
-    public NetworkedVector2 ApplyOffset(uint key, NetworkedVector2 message)
+    public void ApplyOffset(uint key, NetworkedVector2 offset)
     {
-        return reconcile.queue[key] = reconcile.queue[key] - message;
+        if (reconcile.queue.ContainsKey(key))
+        {
+            reconcile.queue[key] += offset;
+        }
     }
+
 }

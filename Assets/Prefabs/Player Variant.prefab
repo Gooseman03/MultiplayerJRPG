@@ -10,7 +10,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 495610275832350845, guid: 4ceac300791eef74a9685f78b676b73c, type: 3}
       propertyPath: m_Name
-      value: Player Apperance Variant
+      value: Player Variant
       objectReference: {fileID: 0}
     - target: {fileID: 6398170217418850887, guid: 4ceac300791eef74a9685f78b676b73c, type: 3}
       propertyPath: m_LocalPosition.x
@@ -73,6 +73,7 @@ PrefabInstance:
     - {fileID: 8533944253021305013, guid: 4ceac300791eef74a9685f78b676b73c, type: 3}
     - {fileID: 7875514272864897525, guid: 4ceac300791eef74a9685f78b676b73c, type: 3}
     - {fileID: -6806970274026974198, guid: 4ceac300791eef74a9685f78b676b73c, type: 3}
+    - {fileID: 4669870670837228838, guid: 4ceac300791eef74a9685f78b676b73c, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []

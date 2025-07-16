@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 73d09cca5346ae14b8263d72af78eb9f
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - LogItemTemplate: {fileID: 9197481963319205126, guid: 41bf9d988302e7d469cabea1f1a2ff4e, type: 3}
+  - styles: {fileID: 11400000, guid: 61b3bc1a1e796f54790e4abb9b19a35f, type: 2}
+  - document: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

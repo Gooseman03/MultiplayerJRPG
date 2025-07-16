@@ -1,0 +1,21 @@
+Label {
+    color: rgb(255, 255, 255);
+    height: auto;
+}
+
+.log_title {
+    -unity-font-style: bold;
+    font-size: 20px;
+}
+
+.log_description {
+    -unity-font-style: normal;
+    color: rgb(144, 144, 144);
+}
+
+.image {
+    flex-grow: 0;
+    align-items: auto;
+    height: 40px;
+    width: 40px;
+}

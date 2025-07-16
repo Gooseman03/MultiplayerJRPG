@@ -1,7 +1,7 @@
 <ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Assets/Resources/StyleSheets/Console/Consolestyle.uss?fileID=7433441132597879392&amp;guid=04f229c5fe0964841a208062b7669114&amp;type=3#Consolestyle" />
-    <ui:VisualElement style="flex-grow: 0; height: 100%; background-color: rgba(0, 0, 0, 0.65); justify-content: space-between; align-self: stretch; flex-direction: column; bottom: 0; position: absolute; right: 0; left: 0; display: flex;">
-        <ui:ScrollView name="LogView" horizontal-scroller-visibility="Hidden" nested-interaction-kind="ForwardScrolling" style="flex-grow: 1; margin-top: 5px; margin-right: 5px; margin-bottom: 5px; margin-left: 5px;" />
+    <ui:VisualElement style="background-color: rgba(0, 0, 0, 0.65); display: flex; margin-top: 20px; margin-right: 20px; margin-bottom: 20px; margin-left: 20px; align-self: stretch; justify-content: flex-end; position: absolute; bottom: 0; right: 0; left: 0;">
+        <ui:ScrollView name="LogView" horizontal-scroller-visibility="Hidden" nested-interaction-kind="ForwardScrolling" style="margin-top: 5px; margin-right: 5px; margin-bottom: 5px; margin-left: 5px; min-height: 400px;" />
         <ui:TextField placeholder-text="Enter Command" name="Input" hide-placeholder-on-focus="false" readonly="false" select-line-by-triple-click="true" />
     </ui:VisualElement>
 </ui:UXML>

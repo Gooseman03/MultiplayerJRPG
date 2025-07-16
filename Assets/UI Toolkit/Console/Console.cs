@@ -40,10 +40,11 @@ public class Console : MonoBehaviour
         root = document.rootVisualElement;
         SetupListView();
         Application.logMessageReceivedThreaded += OnUnityLogReceived;
-        InputSystem.actions.FindAction("consoleToggle").performed += ToggleConsoleVisablity;
+        InputSystem.actions.FindAction("consoleToggle").performed += OnConsoleToggle;
     }
     private void Start()
     {
+        ToggleConsoleVisablity();
         var inputField = root.Q<TextField>("Input");
 
         inputField.RegisterCallback<KeyDownEvent>(evt =>
@@ -53,6 +54,7 @@ public class Console : MonoBehaviour
                 userInput = inputField.value;
                 inputField.value = "";
                 AddLog(userInput);
+                inputField.Focus();
             }
         },
         TrickleDown.TrickleDown
@@ -104,12 +106,13 @@ public class Console : MonoBehaviour
         string message = stackTrace;
         AddLog(title, message, type);
     }
-    private void ToggleConsoleVisablity(InputAction.CallbackContext context)
+    private void OnConsoleToggle(InputAction.CallbackContext _)
     {
-        if (context.ReadValueAsButton() == true)
-        {
-            root.visible = !root.visible;
-            root.focusable = !root.focusable;
-        }
+        ToggleConsoleVisablity();
+    }
+    private void ToggleConsoleVisablity()
+    {
+        root.visible = !root.visible;
+        root.focusable = !root.focusable;
     }
 }

@@ -11,11 +11,11 @@ public class Console : MonoBehaviour
     {
         return type switch
         {
-            LogType.Error => Resources.Load<StyleSheet>("StyleError"),
-            LogType.Assert => Resources.Load<StyleSheet>("StyleAssert"),
-            LogType.Warning => Resources.Load<StyleSheet>("StyleWarning"),
-            LogType.Log => Resources.Load<StyleSheet>("StyleLog"),
-            LogType.Exception => Resources.Load<StyleSheet>("StyleException"),
+            LogType.Error => Resources.Load<StyleSheet>("StyleSheets/Console/StyleError"),
+            LogType.Assert => Resources.Load<StyleSheet>("StyleSheets/Console/StyleAssert"),
+            LogType.Warning => Resources.Load<StyleSheet>("StyleSheets/Console/StyleWarning"),
+            LogType.Log => Resources.Load<StyleSheet>("StyleSheets/Console/StyleLog"),
+            LogType.Exception => Resources.Load<StyleSheet>("StyleSheets/Console/StyleException"),
             _ => null,
         };
     }

@@ -1,0 +1,3 @@
+.image {
+    background-image: url("project://database/Assets/UI%20Toolkit/UnityThemes/UnityDefaultRuntimeTheme.tss?fileID=3506167780502562645&guid=e920314e2495cce4284d05ff15405697&type=3#console.erroricon@2x");
+}

@@ -1,3 +1,4 @@
+using System;
 using System.Net;
 using TMPro;
 using Unity.Netcode;
@@ -11,7 +12,7 @@ public class UIController : MonoBehaviour
     [SerializeField] private UnityEngine.UI.Button clientButton;
     [SerializeField] private UnityEngine.UI.Button hostButton;
     [SerializeField] private TMP_InputField ipField;
-    void Start()
+    private void Start()
     {
         // Makes a new Function that is called when the buttons are clicked
         clientButton.onClick.AddListener(() =>
@@ -28,8 +29,7 @@ public class UIController : MonoBehaviour
             }
 
             // Initialize the client with values set in the ip field
-            // Copied from https://docs-multiplayer.unity3d.com/netcode/current/components/networkmanager/
-
+            // Copied from https://docs-multiplayer.unity3d.com/netcode/current/components/networkmanager/   
             NetworkManager.Singleton.GetComponent<UnityTransport>().SetConnectionData
                 (
                 ipField.text, // IP

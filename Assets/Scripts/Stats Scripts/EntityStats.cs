@@ -1,6 +1,8 @@
 using System;
 using Unity.Netcode;
 using UnityEngine;
+using Ladder.Netcode.StatTypes;
+using Ladder.Netcode.Primitives;
 
 namespace Ladder.EntityStatistics
 {
@@ -16,39 +18,48 @@ namespace Ladder.EntityStatistics
     /// <summary>
     /// <c>EntityStats</c> is a superclass that denotes the basic stats all entities that meaningfully exist within combat utilize.
     /// </summary>
-    public class EntityStats : NetworkBehaviour
+    public abstract class EntityStats : NetworkBehaviour
     {
+
         // Level and general stats
-        public NetworkVariable<int> Level = new(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+        public NetworkVariable<int> Level = new();
         [SerializeField] private const int baseLevel = 1;
 
         // Health Values
-        public NetworkVariable<CappedStat> Health = new(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+        public CappedStat<int> Health = new();
+        //public NetworkVariable<CappedStat<NetworkedInt>> Health = new(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
         [SerializeField] private const int baseHealth = 100;
 
         // Attack Values
-        public NetworkVariable<VariableStat> PhysicalAttack = new(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+        public VariableStat<int> PhysicalAttack = new();
+        //public NetworkVariable<VariableStat<NetworkedInt>> PhysicalAttack = new(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
         [SerializeField] private const int basePhysicalAttack = 10;
 
-        public NetworkVariable<VariableStat> MagicalAttack = new(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+        public VariableStat<int> MagicalAttack = new();
+        //public NetworkVariable<VariableStat<NetworkedInt>> MagicalAttack = new(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
         [SerializeField] private const int baseMagicalAttack = 10;
 
         // Defense Values
-        public NetworkVariable<VariableStat> PhysicalDefense = new(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+        public VariableStat<int> PhysicalDefense = new();
+        //public NetworkVariable<VariableStat<NetworkedInt>> PhysicalDefense = new(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
         [SerializeField] private const int basePhysicalDefense = 10;
 
-        public NetworkVariable<VariableStat> MagicalDefense = new(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+        public VariableStat<int> MagicalDefense = new();
+        //public NetworkVariable<VariableStat<NetworkedInt>> MagicalDefense = new(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
         [SerializeField] private const int baseMagicalDefense = 10;
 
         // Speed Values
-        public NetworkVariable<VariableStat> Speed = new(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+        public VariableStat<int> Speed = new();
+        //public NetworkVariable<VariableStat<NetworkedInt>> Speed = new(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
         [SerializeField] private const int baseSpeed = 5;
 
         // Crit/Luck
-        public NetworkVariable<FloatVariableStat> CritRate = new(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+        public VariableStat<float> CritRate = new();
+        //public NetworkVariable<VariableStat<NetworkedFloat>> CritRate = new(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
         [SerializeField] private const float baseCritRate = 0.05f;
 
-        public NetworkVariable<FloatVariableStat> CritDamage = new(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+        public VariableStat<float> CritDamage = new();
+        //public NetworkVariable<VariableStat<NetworkedFloat>> CritDamage = new(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
         [SerializeField] private const float baseCritDamage = 1.2f;
 
         // Other Resources
@@ -86,38 +97,64 @@ namespace Ladder.EntityStatistics
         public virtual void InitializeValues()
         {
             Level.Value = baseLevel;
-            Health.Value = new CappedStat() 
+
+            Health.CurrentValue = baseHealth;
+            Health.MaxValue = baseHealth;
+            Health.BaseValue = baseHealth;
+            Health.MinValue = 0;
+
+            PhysicalAttack.CurrentValue = basePhysicalAttack;
+            PhysicalAttack.BaseValue = basePhysicalAttack;
+
+            MagicalAttack.CurrentValue = baseMagicalAttack;
+            MagicalAttack.BaseValue = baseMagicalAttack;
+
+            PhysicalDefense.CurrentValue = basePhysicalDefense;
+            PhysicalDefense.BaseValue = basePhysicalDefense;
+
+            MagicalDefense.CurrentValue = baseMagicalDefense;
+            MagicalDefense.BaseValue = baseMagicalDefense;
+
+            Speed.CurrentValue = baseSpeed;
+            Speed.BaseValue = baseSpeed;
+
+            CritRate.CurrentValue = baseCritRate;
+            CritRate.BaseValue = baseCritRate;
+
+            CritDamage.CurrentValue = baseCritDamage;
+            CritDamage.BaseValue = baseCritDamage;
+            /*Health.Value = new CappedStat<NetworkedInt>() 
             {
                 BaseValue = baseHealth, CurrentValue = baseHealth, MaxValue = baseHealth, MinValue = 0
             };
-            PhysicalAttack.Value = new VariableStat()
+            PhysicalAttack.Value = new VariableStat<NetworkedInt>()
             {
                 BaseValue = basePhysicalAttack, CurrentValue = basePhysicalAttack
             };
-            MagicalAttack.Value = new VariableStat()
+            MagicalAttack.Value = new VariableStat<NetworkedInt>()
             {
                 BaseValue = baseMagicalAttack, CurrentValue = baseMagicalAttack
             };
-            PhysicalDefense.Value = new VariableStat()
+            PhysicalDefense.Value = new VariableStat<NetworkedInt>()
             {
                 BaseValue = basePhysicalDefense, CurrentValue = basePhysicalDefense
             };
-            MagicalDefense.Value = new VariableStat()
+            MagicalDefense.Value = new VariableStat<NetworkedInt>()
             {
                 BaseValue = baseMagicalDefense, CurrentValue = baseMagicalDefense
             };
-            Speed.Value = new VariableStat()
+            Speed.Value = new VariableStat<NetworkedInt>()
             {
                 BaseValue = baseSpeed, CurrentValue = baseSpeed
             };
-            CritRate.Value = new FloatVariableStat()
+            CritRate.Value = new VariableStat<NetworkedFloat>()
             {
                 BaseValue = baseCritRate, CurrentValue = baseCritRate
             };
-            CritDamage.Value = new FloatVariableStat()
+            CritDamage.Value = new VariableStat<NetworkedFloat>()
             {
                 BaseValue = baseCritDamage, CurrentValue = baseCritDamage
-            };
+            };*/
         }
 
         // Attaches all events to proper channels.
@@ -126,102 +163,39 @@ namespace Ladder.EntityStatistics
             return;
         }
 
-        // Level Methods
-        public virtual void IncreaseLevel(int amount = 1)
-        {
-            Level.Value += amount;
-        }
-
-
-        // Damage Methods
-        // Does damage to owner of account.
-        public void DoDamage(DamageType damageType, int damage)
-        {
-            int reducedDamage;
-            switch (damageType)
-            {
-                case DamageType.physical:
-                    reducedDamage = ReduceDamage(damage, PhysicalDefense.Value.CurrentValue);
-                    break;
-
-                case DamageType.magical:
-                    reducedDamage = ReduceDamage(damage, MagicalDefense.Value.CurrentValue);
-                    break;
-
-                case DamageType.trueDamage:
-                    reducedDamage = damage;
-                    break;
-
-                default:
-                    throw new ArgumentException("How the fuck did we get here? Your defense damage type is stupid.");
-            }
-            TakeDamage(reducedDamage);
-        }
-
-        // Currently implemented as flat damage reduction, can update later to be more complex if need be
-        // Calculates the reduced damage based on the reduction value applied.
-        private int ReduceDamage(int damage, int reductionValue)
-        {
-            return Math.Max(damage - reductionValue, 0);
-        }
-
-        // Alters the damage of the owner.
-        private void TakeDamage(int damage)
-        {
-            int temp = Health.Value.CurrentValue - damage;
-            if (temp <= Health.Value.MinValue)
-            {
-                Health.Value = new(Health.Value, 0);
-                Die();
-            }
-            else
-            {
-                Health.Value = new(Health.Value, temp);
-            }
-        }
-
-        // Activates the death sequence for the owner.
-        public void Die()
-        {
-            Debug.Log("HOLY SHIT I'M DEAD");
-        }
-
-        // Heals owner by set amount.
-        public void Heal(int healAmount)
-        {
-            if (healAmount <= 0)
-            {
-                return;
-            }
-            int temp = Math.Min(Health.Value.CurrentValue + healAmount, Health.Value.MaxValue);
-            Health.Value = new(Health.Value, temp);
-        }
 
         // Alters the maximum health by specified amount. Scales owner's current health if specified by boolean.
-        public void AlterMaxHealth(int alteration, bool shouldAlterCurrent)
+        public virtual void AlterMaxHealth(int alteration, bool shouldAlterCurrent = true)
         {
-            int temp = Health.Value.MaxValue + alteration;
-            if (temp <= Health.Value.MinValue)
+            Health.MaxValue += alteration;
+            if (Health.MaxValue <= Health.CurrentValue)
+            {
+                Health.CurrentValue = Health.MaxValue;
+            }
+
+            /*int temp = Health.Value.MaxValue + alteration;
+            if (temp <= Health.Value.CurrentValue)
             {
                 Health.Value = new()
                 {
-                    CurrentValue = Health.Value.MinValue,
+                    CurrentValue = temp,
                     BaseValue = Health.Value.BaseValue,
-                    MaxValue = Health.Value.MinValue,
-                    MinValue = Health.Value.MinValue,
+                    MaxValue = temp,
+                    MinValue = Health.Value.MinValue
                 };
-                Die();
-            }
-            else if (shouldAlterCurrent)
-            {
-                TakeDamage(alteration); // Simple automatic health alteration system. Scales health by amount changed.
-            }
+            }*/
         }
 
         // Resets the maximum health to the stored base value. Sets current health to maximum if specified by boolean or is greater than base health.
-        public void ResetMaxHealth(bool resetCurrentHealth)
+        public virtual void ResetMaxHealth(bool resetCurrentHealth)
         {
-            if (resetCurrentHealth || Health.Value.CurrentValue > Health.Value.BaseValue)
+            if (resetCurrentHealth || Health.CurrentValue > Health.BaseValue)
+            {
+                Health.CurrentValue = Health.BaseValue;
+            }
+            Health.MaxValue = Health.BaseValue;
+
+            /*if (resetCurrentHealth || Health.Value.CurrentValue > Health.Value.BaseValue)
             {
                 Health.Value = new()
                 {
@@ -240,53 +214,32 @@ namespace Ladder.EntityStatistics
                     MaxValue = Health.Value.BaseValue,
                     MinValue = Health.Value.MinValue
                 };
-            }
+            }*/
         }
 
-        
-        // Attack Methods
-        // Calculates the damage modified after the relevant damage types are implemented.
-        public int CalculateDamage(DamageType damageType, int baseAttackDamage)
-        {
-            int finalDamage;
-            switch (damageType)
-            {
-                case DamageType.physical:
-                    finalDamage = CalculateBonusDamage(baseAttackDamage, PhysicalAttack.Value.CurrentValue);
-                    break;
-
-                case DamageType.magical:
-                    finalDamage = CalculateBonusDamage(baseAttackDamage, MagicalAttack.Value.CurrentValue);
-                    break;
-
-                case DamageType.trueDamage:
-                    finalDamage = baseAttackDamage;
-                    break;
-
-                default:
-                    throw new ArgumentException("How the hell did we get here? Your attack damage type is stupid.");
-            }
-            return finalDamage;
-        }
-
-        // Calculates the bonus damage gathered by crit and modifiers.
-        private int CalculateBonusDamage(int baseAttackDamage, float modifier)
-        {
-            //bool isCrit = ; Do randomization
-            return Math.Max(Mathf.RoundToInt((1f + modifier) * baseAttackDamage), 0);
-        }
 
         // Alters the attack stat of the specified damage type.
-        public void AlterAttackOfType(DamageType damageType, int alteration)
+        public virtual void AlterAttackOfType(DamageType damageType, int alteration)
         {
             switch (damageType)
             {
                 case DamageType.physical:
-                    PhysicalAttack.Value = new(PhysicalAttack.Value, PhysicalAttack.Value.CurrentValue + alteration);
+                    PhysicalAttack.CurrentValue += alteration;
+
+                    /*PhysicalAttack.Value = new()
+                    {
+                        CurrentValue = PhysicalAttack.Value.CurrentValue + alteration,
+                        BaseValue = PhysicalAttack.Value.BaseValue
+                    };*/
                     break;
 
                 case DamageType.magical:
-                    MagicalAttack.Value = new(MagicalAttack.Value, MagicalAttack.Value.CurrentValue + alteration);
+                    MagicalAttack.CurrentValue += alteration;
+                    /*MagicalAttack.Value = new()
+                    {
+                        CurrentValue = MagicalAttack.Value.CurrentValue + alteration,
+                        BaseValue = MagicalAttack.Value.BaseValue
+                    };*/
                     break;
 
                 case DamageType.trueDamage:
@@ -298,16 +251,26 @@ namespace Ladder.EntityStatistics
         }
 
         // Resets the attack modifier of the specified damage type.
-        public void ResetAttackOfType(DamageType damageType)
+        public virtual void ResetAttackOfType(DamageType damageType)
         {
             switch (damageType)
             {
                 case DamageType.physical:
-                    PhysicalAttack.Value = new(PhysicalAttack.Value, PhysicalAttack.Value.BaseValue);
+                    PhysicalAttack.CurrentValue = PhysicalAttack.BaseValue;
+                    /*PhysicalAttack.Value = new()
+                    {
+                        CurrentValue = PhysicalAttack.Value.BaseValue,
+                        BaseValue = PhysicalAttack.Value.BaseValue
+                    };*/
                     break;
                 
                 case DamageType.magical:
-                    MagicalAttack.Value = new(MagicalAttack.Value, MagicalAttack.Value.BaseValue);
+                    MagicalAttack.CurrentValue = MagicalAttack.BaseValue;
+                    /*MagicalAttack.Value = new()
+                    {
+                        CurrentValue = MagicalAttack.Value.BaseValue,
+                        BaseValue = PhysicalAttack.Value.BaseValue
+                    };*/
                     break;
 
                 case DamageType.trueDamage:
@@ -318,43 +281,75 @@ namespace Ladder.EntityStatistics
             }
         }
 
+
         // Alters the crit rate by the specified alteration.
-        public void AlterCritRate(float alteration)
+        public virtual void AlterCritRate(float alteration)
         {
-            CritRate.Value = new(CritRate.Value, Math.Max(CritRate.Value.CurrentValue + alteration, 0f));
+            CritRate.CurrentValue += alteration;
+            /*CritRate.Value = new()
+            {
+                CurrentValue = Math.Max(CritRate.Value.CurrentValue + alteration, 0f),
+                BaseValue = CritRate.Value.BaseValue
+            };*/
         }
 
         // Resets the crit rate back to the specified base value.
-        public void ResetCritRate()
+        public virtual void ResetCritRate()
         {
-            CritRate.Value = new(CritRate.Value, CritRate.Value.BaseValue);
+            CritRate.CurrentValue = CritRate.BaseValue;
+            /*CritRate.Value = new()
+            {
+                CurrentValue = CritRate.Value.BaseValue,
+                BaseValue = CritRate.Value.BaseValue
+            };*/
         }
 
+
         // Alters the crit damage by the specified amount.
-        public void AlterCritDamage(float alteration)
+        public virtual void AlterCritDamage(float alteration)
         {
-            CritDamage.Value = new(CritDamage.Value, Math.Max(CritDamage.Value.CurrentValue + alteration, 0f));
+            CritDamage.CurrentValue += alteration;
+            /*CritDamage.Value = new()
+            {
+                CurrentValue = Math.Max(CritDamage.Value.CurrentValue + alteration, 1f),
+                BaseValue = CritDamage.Value.BaseValue
+            };*/
         }
 
         // Resets the crit damage to it's specified default value.
-        public void ResetCritDamage()
+        public virtual void ResetCritDamage()
         {
-            CritDamage.Value = new(CritDamage.Value, CritDamage.Value.CurrentValue);
+            CritDamage.CurrentValue = CritDamage.BaseValue;
+            /*CritDamage.Value = new()
+            {
+                CurrentValue = CritDamage.Value.BaseValue,
+                BaseValue = CritDamage.Value.BaseValue
+            };*/
         }
 
 
         // Defense Methods
         // Alters the defense of the specified damage type by the specified amount.
-        public void AlterDefenseOfType(DamageType damageType, int alteration)
+        public virtual void AlterDefenseOfType(DamageType damageType, int alteration)
         {
             switch (damageType)
             {
                 case DamageType.physical:
-                    PhysicalDefense.Value = new(PhysicalDefense.Value, PhysicalDefense.Value.CurrentValue + alteration);
+                    PhysicalDefense.CurrentValue += alteration;
+                    /*PhysicalDefense.Value = new()
+                    {
+                        CurrentValue = PhysicalDefense.Value.CurrentValue + alteration,
+                        BaseValue = PhysicalDefense.Value.BaseValue
+                    };*/
                     break;
 
                 case DamageType.magical:
-                    MagicalDefense.Value = new(MagicalDefense.Value, MagicalDefense.Value.CurrentValue + alteration);
+                    MagicalDefense.CurrentValue += alteration;
+                    /*MagicalDefense.Value = new()
+                    {
+                        CurrentValue = MagicalDefense.Value.CurrentValue + alteration,
+                        BaseValue = MagicalDefense.Value.BaseValue
+                    };*/
                     break;
 
                 case DamageType.trueDamage:
@@ -366,16 +361,26 @@ namespace Ladder.EntityStatistics
         }
 
         // Resets the defense of the specified damage type to its specified base value.
-        public void ResetDefenseOfType(DamageType damageType)
+        public virtual void ResetDefenseOfType(DamageType damageType)
         {
             switch (damageType)
             {
                 case DamageType.physical:
-                    PhysicalDefense.Value = new(PhysicalDefense.Value, PhysicalDefense.Value.BaseValue);
+                    PhysicalDefense.CurrentValue = PhysicalDefense.BaseValue;
+                    /*PhysicalDefense.Value = new()
+                    {
+                        CurrentValue = PhysicalDefense.Value.BaseValue,
+                        BaseValue = PhysicalDefense.Value.BaseValue
+                    };*/
                     break;
 
                 case DamageType.magical:
-                    MagicalDefense.Value = new(MagicalDefense.Value, MagicalDefense.Value.BaseValue);
+                    MagicalDefense.CurrentValue = MagicalDefense.BaseValue;
+                    /*MagicalDefense.Value = new()
+                    {
+                        CurrentValue = MagicalDefense.Value.BaseValue,
+                        BaseValue = MagicalDefense.Value.BaseValue
+                    };*/
                     break;
 
                 case DamageType.trueDamage:
@@ -389,111 +394,25 @@ namespace Ladder.EntityStatistics
 
         // Speed Methods
         // Alters the speed by the specified amount.
-        public void AlterSpeed(int alteration)
+        public virtual void AlterSpeed(int alteration)
         {
-            Speed.Value = new(Speed.Value, Speed.Value.CurrentValue + alteration);
+            Speed.CurrentValue += alteration;
+            /*Speed.Value = new()
+            {
+                CurrentValue = Speed.Value.CurrentValue + alteration,
+                BaseValue = Speed.Value.BaseValue
+            };*/
         }
 
         // Resets the speed to the stored base value.
-        public void ResetSpeed()
+        public virtual void ResetSpeed()
         {
-            Speed.Value = new(Speed.Value, Speed.Value.BaseValue);
-        }
-    }
-
-    /// <summary>
-    /// <c>CappedStat</c> represents a stat an entity involved in combat has that includes some maximum and minimum value.
-    /// </summary>
-    public struct CappedStat : INetworkSerializable
-    {
-        public int BaseValue;
-        public int CurrentValue;
-        public int MaxValue;
-        public int MinValue;
-
-        public CappedStat(CappedStat toCopy, int newCurrent)
-        {
-            BaseValue = toCopy.BaseValue;
-            CurrentValue = newCurrent;
-            MaxValue = toCopy.MaxValue;
-            MinValue = toCopy.MinValue;
-        }
-
-        public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
-        {
-            serializer.SerializeValue(ref BaseValue);
-            serializer.SerializeValue(ref CurrentValue);
-            serializer.SerializeValue(ref MaxValue);
-            serializer.SerializeValue(ref MinValue);
-        }
-    }
-
-    /// <summary>
-    /// <c>FloatCappedStat</c> represents a stat an entity involved in combat has that includes some maximum and minimum value.
-    /// </summary>
-    public struct FloatCappedStat : INetworkSerializable
-    {
-        public float BaseValue;
-        public float CurrentValue;
-        public float MaxValue;
-        public float MinValue;
-
-        public FloatCappedStat(FloatCappedStat toCopy, float newCurrent)
-        {
-            BaseValue = toCopy.BaseValue;
-            CurrentValue = newCurrent;
-            MaxValue = toCopy.MaxValue;
-            MinValue = toCopy.MinValue;
-        }
-
-        public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
-        {
-            serializer.SerializeValue(ref BaseValue);
-            serializer.SerializeValue(ref CurrentValue);
-            serializer.SerializeValue(ref MaxValue);
-            serializer.SerializeValue(ref MinValue);
-        }
-    }
-
-    /// <summary>
-    /// <c>VariableStat</c> represents a stat that can vary due to alterations by other game systems.
-    /// </summary>
-    public struct VariableStat : INetworkSerializable
-    {
-        public int BaseValue;
-        public int CurrentValue;
-
-        public VariableStat(VariableStat toCopy, int newCurrent)
-        {
-            BaseValue = toCopy.BaseValue;
-            CurrentValue = newCurrent;
-        }
-
-        public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
-        {
-            serializer.SerializeValue(ref BaseValue);
-            serializer.SerializeValue(ref CurrentValue);
-        }
-    }
-
-    /// <summary>
-    /// <c>FloatVariableStat</c> represents a stat that can vary due to alterations by other game systems.
-    /// </summary>
-    public struct FloatVariableStat : INetworkSerializable
-    {
-        public float BaseValue;
-        public float CurrentValue;
-
-        public FloatVariableStat(FloatVariableStat toCopy, float newCurrent)
-        {
-            BaseValue = toCopy.BaseValue;
-            CurrentValue = newCurrent;
-        }
-
-        public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
-        {
-            serializer.SerializeValue(ref BaseValue);
-            serializer.SerializeValue(ref CurrentValue);
+            Speed.CurrentValue = Speed.BaseValue;
+            /*Speed.Value = new()
+            {
+                CurrentValue = Speed.Value.BaseValue,
+                BaseValue = Speed.Value.BaseValue
+            };*/
         }
     }
 }

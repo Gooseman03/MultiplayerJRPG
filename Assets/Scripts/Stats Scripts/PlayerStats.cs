@@ -13,7 +13,7 @@ namespace Ladder.EntityStatistics
         public NetworkVariable<float> ExpMultiplier = new(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
         // Resources
-        public NetworkVariable<CappedStat> MagicPoints = new(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+        //public NetworkVariable<CappedStat> MagicPoints = new(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
         [SerializeField] private const int baseMagicPoints = 30;
 
         public override void OnNetworkSpawn()

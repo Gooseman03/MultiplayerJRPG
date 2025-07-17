@@ -10,19 +10,19 @@ public class EntityStatsEditor : Editor
         DrawDefaultInspector();
         if (GUILayout.Button("Force 5 Physical Damage"))
         {
-            ((EntityStats)target).DoDamage(DamageType.physical, 5);
+            ((IDamageable)target).DoDamage(DamageType.physical, 5);
         }
         if (GUILayout.Button("Force 5 Magical Damage"))
         {
-            ((EntityStats)target).DoDamage(DamageType.magical, 5);
+            ((IDamageable)target).DoDamage(DamageType.magical, 5);
         }
         if (GUILayout.Button("Force 1000000 Damage"))
         {
-            ((EntityStats)target).DoDamage(DamageType.trueDamage, 1000000);
+            ((IDamageable)target).DoDamage(DamageType.trueDamage, 1000000);
         }
         if (GUILayout.Button("Force Kill"))
         {
-            ((EntityStats)target).Die();
+            ((IKillable)target).Kill();
         }
     }
 }

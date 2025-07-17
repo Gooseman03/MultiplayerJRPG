@@ -23,3 +23,11 @@
     align-self: center;
     border-bottom-right-radius: 0;
 }
+
+.Aidan {
+    background-image: resource('Sprites/Screenshot 2025-06-14 020736');
+}
+
+.Dude {
+    background-image: resource('Sprites/player temp');
+}

@@ -12,8 +12,6 @@ public class ConsoleLog
     public StyleSheet addedStyle;
     public VisualElement UIElement { get; private set; }
 
-    string fileName = "MyFile.txt";
-
     public ConsoleLog(string Title, string Description, StyleSheet style)
     {
         this.Title = Title;

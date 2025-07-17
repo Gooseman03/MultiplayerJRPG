@@ -67,22 +67,7 @@ public class Console : MonoBehaviour
     }
     private void SetupListView()
     {
-        // Find ListView from UI
         LogView = root.Q<ScrollView>("LogView");
-        
-
-        //LogView.makeItem = () =>
-        //{
-        //    var template = LogItemTemplate;
-        //    var element = template.CloneTree();
-        //    return element;
-        //};
-        //
-        //LogView.bindItem = (element, index) =>
-        //{
-        //    var log = logs[index];
-        //    log.BindUI(element);
-        //};
     }
 
     public void AddLog(string Title, string Description = "", LogType type = LogType.Log)
@@ -91,13 +76,6 @@ public class Console : MonoBehaviour
         var template = LogItemTemplate.Instantiate();
         var visual = logItem.CreateUIElement(template.templateSource);
         LogView.Add(visual);
-    }
-    public void RemoveLog(ConsoleLog logItem)
-    {
-        //if (LogView.Contains(logItem))
-        //{
-        //    LogView.Remove(logItem);
-        //}
     }
     private void OnUnityLogReceived(string condition, string stackTrace, LogType type)
     {

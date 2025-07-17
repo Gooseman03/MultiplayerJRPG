@@ -1,19 +1,6 @@
 <ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
-    <Style src="project://database/Assets/Resources/ItemSheet.uss?fileID=7433441132597879392&amp;guid=cb9822e34dcd8734d9c134830e490296&amp;type=3#ItemSheet" />
-    <ui:VisualElement style="flex-grow: 1; background-color: rgb(115, 115, 115); flex-direction: row; align-items: flex-start; align-self: auto; justify-content: center; flex-wrap: wrap; align-content: auto; padding-top: 32px; padding-right: 32px; padding-bottom: 32px; padding-left: 32px;">
-        <InventoryItem asset="project://database/Assets/Resources/Item.uxml?fileID=9197481963319205126&amp;guid=be18f8ec662ff914883a86c17c947ee3&amp;type=3#Item" />
-        <InventoryItem asset="project://database/Assets/Resources/Item.uxml?fileID=9197481963319205126&amp;guid=be18f8ec662ff914883a86c17c947ee3&amp;type=3#Item" item-type="dude" />
-        <InventoryItem asset="project://database/Assets/Resources/Item.uxml?fileID=9197481963319205126&amp;guid=be18f8ec662ff914883a86c17c947ee3&amp;type=3#Item" />
-        <InventoryItem asset="project://database/Assets/Resources/Item.uxml?fileID=9197481963319205126&amp;guid=be18f8ec662ff914883a86c17c947ee3&amp;type=3#Item" />
-        <InventoryItem asset="project://database/Assets/Resources/Item.uxml?fileID=9197481963319205126&amp;guid=be18f8ec662ff914883a86c17c947ee3&amp;type=3#Item" />
-        <InventoryItem asset="project://database/Assets/Resources/Item.uxml?fileID=9197481963319205126&amp;guid=be18f8ec662ff914883a86c17c947ee3&amp;type=3#Item" item-type="dude" />
-        <InventoryItem asset="project://database/Assets/Resources/Item.uxml?fileID=9197481963319205126&amp;guid=be18f8ec662ff914883a86c17c947ee3&amp;type=3#Item" />
-        <InventoryItem asset="project://database/Assets/Resources/Item.uxml?fileID=9197481963319205126&amp;guid=be18f8ec662ff914883a86c17c947ee3&amp;type=3#Item" />
-        <InventoryItem asset="project://database/Assets/Resources/Item.uxml?fileID=9197481963319205126&amp;guid=be18f8ec662ff914883a86c17c947ee3&amp;type=3#Item" />
-        <InventoryItem asset="project://database/Assets/Resources/Item.uxml?fileID=9197481963319205126&amp;guid=be18f8ec662ff914883a86c17c947ee3&amp;type=3#Item" />
-        <InventoryItem asset="project://database/Assets/Resources/Item.uxml?fileID=9197481963319205126&amp;guid=be18f8ec662ff914883a86c17c947ee3&amp;type=3#Item" item-type="dude" />
-        <InventoryItem asset="project://database/Assets/Resources/Item.uxml?fileID=9197481963319205126&amp;guid=be18f8ec662ff914883a86c17c947ee3&amp;type=3#Item" item-type="dude" />
-        <InventoryItem asset="project://database/Assets/Resources/Item.uxml?fileID=9197481963319205126&amp;guid=be18f8ec662ff914883a86c17c947ee3&amp;type=3#Item" item-type="dude" />
-        <InventoryItem asset="project://database/Assets/Resources/Item.uxml?fileID=9197481963319205126&amp;guid=be18f8ec662ff914883a86c17c947ee3&amp;type=3#Item" item-type="dude" />
+    <Style src="project://database/Assets/Resources/StyleSheets/Inventory/ItemSheet.uss?fileID=7433441132597879392&amp;guid=cb9822e34dcd8734d9c134830e490296&amp;type=3#ItemSheet" />
+    <ui:VisualElement style="flex-grow: 1; align-items: center; justify-content: center;">
+        <ui:VisualElement name="Grid" style="flex-grow: 0; background-color: rgb(115, 115, 115); flex-direction: row; align-self: center; flex-wrap: wrap; align-content: auto; padding-top: 28px; padding-right: 28px; padding-bottom: 28px; padding-left: 28px; width: 85%; height: 78%; align-items: flex-start;" />
     </ui:VisualElement>
 </ui:UXML>

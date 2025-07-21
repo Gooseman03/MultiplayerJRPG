@@ -1,5 +1,5 @@
 <ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
-    <Style src="project://database/Assets/Resources/ItemSheet.uss?fileID=7433441132597879392&amp;guid=cb9822e34dcd8734d9c134830e490296&amp;type=3#ItemSheet" />
+    <Style src="project://database/Assets/Resources_Moved/ItemSheet.uss?fileID=7433441132597879392&amp;guid=cb9822e34dcd8734d9c134830e490296&amp;type=3#ItemSheet" />
     <ui:VisualElement name="Border" class="item size">
         <ui:VisualElement name="Image" class="size" style="background-color: rgb(255, 255, 255); border-left-color: rgba(166, 43, 43, 0); border-right-color: rgba(166, 43, 43, 0); border-top-color: rgba(166, 43, 43, 0); border-bottom-color: rgba(166, 43, 43, 0);" />
     </ui:VisualElement>

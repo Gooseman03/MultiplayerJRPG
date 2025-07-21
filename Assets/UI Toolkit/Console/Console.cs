@@ -4,18 +4,26 @@ using System.Collections.Generic;
 using UnityEngine.Events;
 using UnityEngine.InputSystem;
 using System;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
+
 
 public class Console : MonoBehaviour
 {
+    [SerializeField] private StyleSheet errorStyle;
+    [SerializeField] private StyleSheet assertStyle;
+    [SerializeField] private StyleSheet warningStyle;
+    [SerializeField] private StyleSheet logStyle;
+    [SerializeField] private StyleSheet exceptionStyle;
     public StyleSheet GetStyleSheet(LogType type)
     {
         return type switch
         {
-            LogType.Error => Resources.Load<StyleSheet>("StyleSheets/Console/StyleError"),
-            LogType.Assert => Resources.Load<StyleSheet>("StyleSheets/Console/StyleAssert"),
-            LogType.Warning => Resources.Load<StyleSheet>("StyleSheets/Console/StyleWarning"),
-            LogType.Log => Resources.Load<StyleSheet>("StyleSheets/Console/StyleLog"),
-            LogType.Exception => Resources.Load<StyleSheet>("StyleSheets/Console/StyleException"),
+            LogType.Error       =>        errorStyle,
+            LogType.Assert      =>       assertStyle,
+            LogType.Warning     =>      warningStyle,
+            LogType.Log         =>          logStyle,
+            LogType.Exception   =>    exceptionStyle,
             _ => null,
         };
     }

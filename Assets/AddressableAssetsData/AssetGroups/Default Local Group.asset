@@ -1,0 +1,81 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Default Local Group
+  m_EditorClassIdentifier: 
+  m_GroupName: Default Local Group
+  m_GUID: 2720c6bc930e7874e91c947a10f88a43
+  m_SerializeEntries:
+  - m_GUID: 00fb30ee2c224f1468d30ec3513e3f2e
+    m_Address: Sprites/player temp
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 04f229c5fe0964841a208062b7669114
+    m_Address: StyleSheets/Console/Consolestyle
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - StyleSheet
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0bcfdf21505cbbd49957b483dae490de
+    m_Address: StyleSheets/Console/StyleLog
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - StyleSheet
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 19d455eb76d1b2542ba27c8399e2dfb8
+    m_Address: StyleSheets/Console/StyleError
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - StyleSheet
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 635e9fab5d2a6b949b641c00ee7e6a01
+    m_Address: Sprites/Screenshot 2025-06-14 020736
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a7002b4a2421d794f8e44fae89354c0c
+    m_Address: StyleSheets/Console/StyleWarning
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - StyleSheet
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: baafe3a7bf30fef4aae837373e61e3ec
+    m_Address: StyleSheets/Console/StyleException
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - StyleSheet
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c0cada05342e4794e9017b8ea0266082
+    m_Address: StyleSheets/Console/StyleAssert
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - StyleSheet
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cb9822e34dcd8734d9c134830e490296
+    m_Address: StyleSheets/Inventory/ItemSheet
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - StyleSheet
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f191aed5d9338f74592d96f7368b58b1
+    m_Address: StyleSheets/Console/BaseLog
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - StyleSheet
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: fe0eafed4114f58449a5b82e3fcfc570, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: bf19a2fb638e3fc4998190df3f80a176, type: 2}
+    - {fileID: 11400000, guid: ba05be93200d3264e8fec438be957e00, type: 2}

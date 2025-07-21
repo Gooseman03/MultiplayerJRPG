@@ -237,6 +237,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 73d09cca5346ae14b8263d72af78eb9f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  errorStyle: {fileID: 7433441132597879392, guid: 19d455eb76d1b2542ba27c8399e2dfb8, type: 3}
+  assertStyle: {fileID: 7433441132597879392, guid: c0cada05342e4794e9017b8ea0266082, type: 3}
+  warningStyle: {fileID: 7433441132597879392, guid: a7002b4a2421d794f8e44fae89354c0c, type: 3}
+  logStyle: {fileID: 7433441132597879392, guid: 0bcfdf21505cbbd49957b483dae490de, type: 3}
+  exceptionStyle: {fileID: 7433441132597879392, guid: baafe3a7bf30fef4aae837373e61e3ec, type: 3}
   LogItemTemplate: {fileID: 9197481963319205126, guid: 41bf9d988302e7d469cabea1f1a2ff4e, type: 3}
   document: {fileID: 608014094}
   OnUserInputChanged:
@@ -626,7 +631,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1320361762
 RectTransform:
   m_ObjectHideFlags: 0

@@ -1,0 +1,10 @@
+.menu {
+    width: 95%;
+    align-self: center;
+}
+
+.Center {
+    justify-content: center;
+    align-items: stretch;
+    flex-grow: 0;
+}

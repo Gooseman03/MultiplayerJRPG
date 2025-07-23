@@ -43,6 +43,16 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6b3769a560a8ab54fbbf49c379f777b5
+    m_Address: InventoryUIEditor
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 855fb1d8c80a168418f3cd756fb9adb9
+    m_Address: Aidan
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a7002b4a2421d794f8e44fae89354c0c
     m_Address: StyleSheets/Console/StyleWarning
     m_ReadOnly: 0
@@ -72,6 +82,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels:
     - StyleSheet
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f3bf2cf7ded43384c9281191bf49030c
+    m_Address: Dude
+    m_ReadOnly: 0
+    m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: fe0eafed4114f58449a5b82e3fcfc570, type: 2}

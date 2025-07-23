@@ -1,0 +1,4 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+    <Style src="project://database/Assets/ItemDrawer.uss?fileID=7433441132597879392&amp;guid=047f642e38c62ec468b3d7ce06a27a6c&amp;type=3#ItemDrawer" />
+    <ui:ListView enabled="true" />
+</ui:UXML>

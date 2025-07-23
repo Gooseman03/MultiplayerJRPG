@@ -1,33 +1,27 @@
-.item {
-    padding-top: 0;
-    padding-right: 0;
-    padding-bottom: 0;
-    padding-left: 0;
-    margin-top: 8px;
-    margin-right: 8px;
-    margin-bottom: 8px;
-    margin-left: 8px;
+.grid {
+    align-items: center;
+    align-content: center;
+    flex-direction: row;
+    flex-wrap: wrap;
+    background-color: rgb(57, 64, 79);
+    flex-grow: 0;
+    justify-content: space-evenly;
+    min-height: 10%;
 }
 
-.size {
-    background-color: rgb(140, 0, 0);
-    border-top-width: 4px;
-    border-right-width: 4px;
-    border-bottom-width: 4px;
-    border-left-width: 4px;
-    border-top-left-radius: 12px;
-    border-top-right-radius: 12px;
-    border-bottom-left-radius: 12px;
-    min-width: 64px;
-    min-height: 64px;
-    align-self: center;
+.background-disable {
+    background-color: rgba(0, 0, 0, 0);
+    background-image: none;
+    border-left-width: 0;
+    border-right-width: 0;
+    border-top-width: 0;
+    border-bottom-width: 0;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    border-top-right-radius: 0;
     border-bottom-right-radius: 0;
-}
-
-.Aidan {
-    background-image: resource('Sprites/Screenshot 2025-06-14 020736');
-}
-
-.Dude {
-    background-image: resource('Sprites/player temp');
+    border-left-color: rgba(0, 0, 0, 0);
+    border-right-color: rgba(0, 0, 0, 0);
+    border-top-color: rgba(0, 0, 0, 0);
+    border-bottom-color: rgba(0, 0, 0, 0);
 }

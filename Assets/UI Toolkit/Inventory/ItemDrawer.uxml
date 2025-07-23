@@ -1,0 +1,12 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+    <ui:Template name="Item" src="project://database/Assets/UI%20Toolkit/Inventory/Item.uxml?fileID=9197481963319205126&amp;guid=be18f8ec662ff914883a86c17c947ee3&amp;type=3#Item" />
+    <Style src="project://database/Assets/ItemDrawer.uss?fileID=7433441132597879392&amp;guid=047f642e38c62ec468b3d7ce06a27a6c&amp;type=3#ItemDrawer" />
+    <ui:VisualElement style="flex-direction: row; align-items: center;">
+        <ui:VisualElement name="FieldContainer" style="flex-grow: 1;">
+            <uie:PropertyField name="Name" binding-path="Name" />
+            <uie:PropertyField name="Description" binding-path="Description" />
+            <uie:PropertyField name="Sprite" binding-path="Icon" style="-unity-font-style: normal; flex-grow: 0;" />
+        </ui:VisualElement>
+        <ui:Instance template="Item" style="flex-shrink: 0; flex-grow: 0; align-items: flex-end;" />
+    </ui:VisualElement>
+</ui:UXML>

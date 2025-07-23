@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<xs:schema xmlns:editor="UnityEditor.UIElements" xmlns:engine="UnityEngine.UIElements" xmlns="UnityEditor.Accessibility" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:schema xmlns:editor="UnityEditor.UIElements" xmlns:engine="UnityEngine.UIElements" xmlns:AddressablesGUI="UnityEditor.AddressableAssets.GUIElements" xmlns="UnityEditor.AddressableAssets.Diagnostics" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:import schemaLocation="UnityEngine.UIElements.xsd" namespace="UnityEngine.UIElements" />
   <xs:include schemaLocation="GlobalNamespace.xsd" />
   <xs:import schemaLocation="UnityEditor.ShaderGraph.Drawing.xsd" namespace="UnityEditor.ShaderGraph.Drawing" />
@@ -30,4 +30,6 @@
   <xs:import schemaLocation="UnityEditor.Audio.UIElements.xsd" namespace="UnityEditor.Audio.UIElements" />
   <xs:import schemaLocation="Unity.Profiling.Editor.xsd" namespace="Unity.Profiling.Editor" />
   <xs:import schemaLocation="UnityEditor.Accessibility.xsd" namespace="UnityEditor.Accessibility" />
+  <xs:import schemaLocation="UnityEditor.AddressableAssets.GUIElements.xsd" namespace="UnityEditor.AddressableAssets.GUIElements" />
+  <xs:import schemaLocation="UnityEditor.AddressableAssets.Diagnostics.xsd" namespace="UnityEditor.AddressableAssets.Diagnostics" />
 </xs:schema>

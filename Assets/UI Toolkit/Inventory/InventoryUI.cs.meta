@@ -1,2 +1,16 @@
 fileFormatVersion: 2
 guid: 775014d2bb77c754d9a995f5219480d0
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - uiDocument: {instanceID: 0}
+  - inventory: {instanceID: 0}
+  - ItemTemplate: {instanceID: 0}
+  - ItemUiTemplate: {fileID: 9197481963319205126, guid: be18f8ec662ff914883a86c17c947ee3, type: 3}
+  - <Icon>k__BackingField: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

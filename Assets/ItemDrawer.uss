@@ -1,0 +1,8 @@
+#Sprite .unity-property-field__label {
+    display: none;
+}
+
+#Image {
+    width: 128px;
+    height: 128px;
+}

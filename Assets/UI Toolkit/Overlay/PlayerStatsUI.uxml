@@ -1,0 +1,10 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/Healthbar.uss?fileID=7433441132597879392&amp;guid=e55ce9a1a880bb846b6a6d4d11b06160&amp;type=3#Healthbar" />
+    <ui:VisualElement class="background-color border">
+        <ui:VisualElement name="Bar" class="foreground-color" style="width: auto; flex-grow: 1;">
+            <Bindings>
+                <ui:DataBinding property="style.width" data-source-path="ValuePersentage" data-source-type="TempPlayerStats, Assembly-CSharp" binding-mode="ToTarget" />
+            </Bindings>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

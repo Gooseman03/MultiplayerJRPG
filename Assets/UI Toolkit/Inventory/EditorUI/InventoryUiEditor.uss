@@ -6,5 +6,4 @@
 .Center {
     justify-content: center;
     align-items: stretch;
-    flex-grow: 0;
 }

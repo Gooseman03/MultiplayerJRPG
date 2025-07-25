@@ -1,0 +1,4 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/Tooltip.uss?fileID=7433441132597879392&amp;guid=22b87a9589e1529449258cf15954da10&amp;type=3#Tooltip" />
+    <ItemTooltip />
+</ui:UXML>

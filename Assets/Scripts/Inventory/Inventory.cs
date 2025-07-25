@@ -6,7 +6,7 @@ using UnityEngine.VFX;
 
 public class Inventory : MonoBehaviour
 {
-    public List<Item> items = new();
+    public List<Item> items = new() { };
     
     public event Action OnInventoryItemAdded;
     public event Action OnInventoryItemRemoved;

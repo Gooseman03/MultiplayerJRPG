@@ -260,24 +260,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   items:
-  - Name: 
-    Description: 
-    Icon: {fileID: 21300000, guid: 00fb30ee2c224f1468d30ec3513e3f2e, type: 3}
-  - Name: 
-    Description: 
-    Icon: {fileID: 21300000, guid: 00fb30ee2c224f1468d30ec3513e3f2e, type: 3}
-  - Name: 
-    Description: 
-    Icon: {fileID: 21300000, guid: 635e9fab5d2a6b949b641c00ee7e6a01, type: 3}
-  - Name: 
-    Description: 
-    Icon: {fileID: 21300000, guid: 00fb30ee2c224f1468d30ec3513e3f2e, type: 3}
-  - Name: 
-    Description: 
-    Icon: {fileID: 21300000, guid: 635e9fab5d2a6b949b641c00ee7e6a01, type: 3}
-  - Name: 
-    Description: 
-    Icon: {fileID: 21300000, guid: 00fb30ee2c224f1468d30ec3513e3f2e, type: 3}
+  - Creator: {fileID: 0}
+  - Creator: {fileID: 0}
+  - Creator: {fileID: 0}
+  - Creator: {fileID: 0}
+  - Creator: {fileID: 0}
 --- !u!114 &545439734
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -287,7 +274,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 545439727}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 775014d2bb77c754d9a995f5219480d0, type: 3}
+  m_Script: {fileID: 11500000, guid: 238acdc232969fa43aa4971c6b98c58e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   uiDocument: {fileID: 1320361763}
@@ -682,7 +669,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_PanelSettings: {fileID: 11400000, guid: 0b2bd76c44f57b64194093cb204df812, type: 2}
   m_ParentUI: {fileID: 0}
-  sourceAsset: {fileID: 9197481963319205126, guid: d678d32f59f00514eae231861f8d86d8, type: 3}
+  sourceAsset: {fileID: 9197481963319205126, guid: 279fa85cb8203f84aace17cd9657be10, type: 3}
   m_SortingOrder: 0
   m_WorldSpaceSizeMode: 1
   m_WorldSpaceWidth: 1920
@@ -1821,7 +1808,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_PresetAsset: {fileID: 0}
   m_PresetReference:
-    rid: 4788504344392892689
+    rid: 4788504536746558345
   m_Scenario:
     rid: 4788504223292063880
   m_IsScenarioSettingsFolded: 1
@@ -1887,7 +1874,7 @@ MonoBehaviour:
         <PacketJitterMs>k__BackingField: 50
         <PacketLossInterval>k__BackingField: 0
         <PacketLossPercent>k__BackingField: 1
-    - rid: 4788504344392892689
+    - rid: 4788504536746558345
       type: {class: NetworkSimulatorPreset, ns: Unity.Multiplayer.Tools.NetworkSimulator.Runtime, asm: Unity.Multiplayer.Tools.NetworkSimulator.Runtime}
       data:
         <Name>k__BackingField: 'Home Broadband [WIFI, Cable, Console, PC]'

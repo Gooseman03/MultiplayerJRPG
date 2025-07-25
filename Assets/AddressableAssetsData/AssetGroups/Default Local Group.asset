@@ -38,6 +38,11 @@ MonoBehaviour:
     m_SerializedLabels:
     - StyleSheet
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3c7089e218551854e85cb8add3e16dd9
+    m_Address: ItemStyle
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 635e9fab5d2a6b949b641c00ee7e6a01
     m_Address: Sprites/Screenshot 2025-06-14 020736
     m_ReadOnly: 0

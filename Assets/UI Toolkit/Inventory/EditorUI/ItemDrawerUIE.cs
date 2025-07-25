@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.UIElements;
+using static UnityEditor.Progress;
 
 [CustomPropertyDrawer(typeof(Item))]
 public class ItemDrawerUIE : PropertyDrawer

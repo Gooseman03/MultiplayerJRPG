@@ -1,0 +1,20 @@
+.tooltip__overlay {
+    background-color: rgba(0, 0, 0, 0.77);
+    border-top-width: 1px;
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+    border-left-width: 1px;
+    border-left-color: rgb(55, 55, 55);
+    border-right-color: rgb(55, 55, 55);
+    border-top-color: rgb(55, 55, 55);
+    border-bottom-color: rgb(55, 55, 55);
+}
+
+.tooltip__overlay--title {
+    color: rgb(204, 204, 204);
+}
+
+.tooltip__overlay--description {
+    color: rgb(135, 135, 135);
+    font-size: 12px;
+}

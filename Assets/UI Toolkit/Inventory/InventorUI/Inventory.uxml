@@ -1,0 +1,6 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI%20Toolkit/Inventory/InventorUI/Inventory.uss?fileID=7433441132597879392&amp;guid=c2056912714e4ca48bc4481df0262fcf&amp;type=3#Inventory" />
+    <ui:VisualElement style="flex-grow: 1; align-items: center; justify-content: center;">
+        <ui:VisualElement name="background" class="background" />
+    </ui:VisualElement>
+</ui:UXML>

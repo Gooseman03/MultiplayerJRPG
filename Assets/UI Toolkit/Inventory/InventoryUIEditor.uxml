@@ -1,8 +1,0 @@
-<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
-    <ui:Template name="Inventory" src="project://database/Assets/UI%20Toolkit/Inventory/InventoryGrid.uxml?fileID=9197481963319205126&amp;guid=d678d32f59f00514eae231861f8d86d8&amp;type=3#InventoryGrid" />
-    <Style src="project://database/Assets/UI%20Toolkit/Inventory/InventoryUiEditor.uss?fileID=7433441132597879392&amp;guid=05920b66e81c8bf4b9214ebe2cfd0747&amp;type=3#InventoryUiEditor" />
-    <InventoryUIEditor name="Inventory" item-template="project://database/Assets/UI%20Toolkit/Inventory/Item.uxml?fileID=9197481963319205126&amp;guid=be18f8ec662ff914883a86c17c947ee3&amp;type=3#Item" class="Center">
-        <uie:PropertyField binding-path="items" name="elements" />
-        <ui:Instance template="Inventory" class="menu" />
-    </InventoryUIEditor>
-</ui:UXML>

@@ -1,0 +1,8 @@
+#Sprite .unity-property-field__label {
+    display: none;
+}
+
+.editor__container {
+    flex-direction: row;
+    align-items: center;
+}

@@ -26,7 +26,7 @@ public class InventoryEditor : Editor
         {
             VisualElement uxmlContent = m_InspectorUXML.CloneTree();
             myInspector.Add(uxmlContent);
-            myInspector.Q<InventoryUIEditor>("Inventory").Init((Inventory)target);
+            //myInspector.Q<InventoryUIEditor>("Inventory").Init((Inventory)target);
         }
 
         // Return the finished Inspector UI.
